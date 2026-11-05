@@ -2,7 +2,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { play } from "@/lib/sound";
 import Mascot from "@/components/Mascot";
-import { ChevronLeft, ChevronRight, RotateCcw, Shuffle } from "lucide-react";
+import SwipeCard from "@/components/SwipeCard";
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, RotateCcw, Shuffle } from "lucide-react";
 
 type Card = { id: string; front: string; back: string };
 
@@ -144,6 +145,7 @@ export default function StudyDeck({ cards: initial }: { cards: Card[] }) {
           </div>
         ) : (
           <>
+            <SwipeCard resetKey={`${card.id}-${i}`} onSwipe={(dir) => mark(dir === "right")} leftLabel="Still learning" rightLabel="I know this">
             <button
               className="flip block h-80 w-full text-left sm:h-96 lg:h-[28rem]"
               data-sfx="none"
@@ -169,13 +171,17 @@ export default function StudyDeck({ cards: initial }: { cards: Card[] }) {
                 </div>
               </div>
             </button>
+            </SwipeCard>
+            <p className="mt-3 text-center text-xs font-bold text-ink-soft">
+              Swipe left for <span className="text-coral">Still learning</span>, right for <span className="text-mint">I know this</span>
+            </p>
 
-            <div className="mt-6 grid grid-cols-2 gap-3">
+            <div className="mt-4 grid grid-cols-2 gap-3">
               <button className="btn" data-sfx="none" onClick={() => mark(false)}>
-                Still learning
+                <ArrowLeft size={16} /> Still learning
               </button>
               <button className="btn btn-sun" data-sfx="none" onClick={() => mark(true)}>
-                I know this
+                I know this <ArrowRight size={16} />
               </button>
             </div>
             <div className="mt-4 flex items-center justify-between">
