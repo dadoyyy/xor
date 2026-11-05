@@ -38,7 +38,7 @@ export default function RoomActions() {
 
   return (
     <div className="card p-4 sm:p-5">
-      <div role="tablist" className="flex gap-2">
+      <div role="tablist" className="flex items-center justify-between gap-2">
         <button
           role="tab"
           aria-selected={tab === "join"}
