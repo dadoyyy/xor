@@ -1,5 +1,6 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { play } from "@/lib/sound";
 import Mascot from "@/components/Mascot";
 import { ChevronLeft, ChevronRight, RotateCcw, Shuffle } from "lucide-react";
 
@@ -29,9 +30,15 @@ export default function StudyDeck({ cards: initial }: { cards: Card[] }) {
       if (e.target instanceof HTMLInputElement) return;
       if (e.key === " " || e.key === "Enter") {
         e.preventDefault();
+        play("flip");
         setFlipped((f) => !f);
-      } else if (e.key === "ArrowRight") go(1);
-      else if (e.key === "ArrowLeft") go(-1);
+      } else if (e.key === "ArrowRight") {
+        play("next");
+        go(1);
+      } else if (e.key === "ArrowLeft") {
+        play("next");
+        go(-1);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -39,6 +46,7 @@ export default function StudyDeck({ cards: initial }: { cards: Card[] }) {
 
   function mark(isKnown: boolean) {
     if (!card) return;
+    play(isKnown ? "know" : "learning");
     setKnown((s) => {
       const n = new Set(s);
       if (isKnown) n.add(card.id);
@@ -66,6 +74,13 @@ export default function StudyDeck({ cards: initial }: { cards: Card[] }) {
     setI(0);
     setFlipped(false);
   }
+
+  // little celebration when the deck is finished
+  const wasDone = useRef(false);
+  useEffect(() => {
+    if (done && !wasDone.current && deck.length > 0) play("deckDone");
+    wasDone.current = done;
+  }, [done, deck.length]);
 
   const learningLeft = order.filter((c) => !known.has(c.id)).length;
 
@@ -131,7 +146,11 @@ export default function StudyDeck({ cards: initial }: { cards: Card[] }) {
           <>
             <button
               className="flip block h-80 w-full text-left sm:h-96 lg:h-[28rem]"
-              onClick={() => setFlipped((f) => !f)}
+              data-sfx="none"
+              onClick={() => {
+                play("flip");
+                setFlipped((f) => !f);
+              }}
               aria-label={flipped ? "Show question" : "Show answer"}
             >
               <div className={`flip-inner h-full ${flipped ? "flipped" : ""}`}>
@@ -152,18 +171,18 @@ export default function StudyDeck({ cards: initial }: { cards: Card[] }) {
             </button>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <button className="btn" onClick={() => mark(false)}>
+              <button className="btn" data-sfx="none" onClick={() => mark(false)}>
                 Still learning
               </button>
-              <button className="btn btn-sun" onClick={() => mark(true)}>
+              <button className="btn btn-sun" data-sfx="none" onClick={() => mark(true)}>
                 I know this
               </button>
             </div>
             <div className="mt-4 flex items-center justify-between">
-              <button className="btn btn-ghost btn-sm" onClick={() => go(-1)} disabled={i === 0} aria-label="Previous card">
+              <button className="btn btn-ghost btn-sm" data-sfx="none" onClick={() => { play("next"); go(-1); }} disabled={i === 0} aria-label="Previous card">
                 <ChevronLeft size={18} /> Back
               </button>
-              <button className="btn btn-ghost btn-sm" onClick={() => go(1)} aria-label="Next card">
+              <button className="btn btn-ghost btn-sm" data-sfx="none" onClick={() => { play("next"); go(1); }} aria-label="Next card">
                 Skip <ChevronRight size={18} />
               </button>
             </div>

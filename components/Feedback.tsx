@@ -1,6 +1,7 @@
 "use client";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { AlertTriangle, CheckCircle2, Info, X, XCircle } from "lucide-react";
+import { play } from "@/lib/sound";
 
 /* ------------------------------------------------------------------ */
 /* Themed toasts + confirm dialogs (replace browser alert/confirm).    */
@@ -48,6 +49,7 @@ export function FeedbackProvider({ children }: { children: React.ReactNode }) {
   const toast = useCallback<Ctx["toast"]>(
     ({ kind = "success", title, body }) => {
       const id = nextId.current++;
+      if (kind !== "info") play(kind === "error" ? "error" : "success");
       setToasts((ts) => [...ts.slice(-3), { id, kind, title, body }]);
       setTimeout(() => dismiss(id), kind === "error" ? 6000 : 3500);
     },

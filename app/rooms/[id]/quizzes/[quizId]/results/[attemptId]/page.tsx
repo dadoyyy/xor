@@ -1,3 +1,4 @@
+import ResultSound from "@/components/ResultSound";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireRoom } from "@/lib/auth";
@@ -83,6 +84,7 @@ export default async function Results({ params }: { params: Promise<{ id: string
 
       <div className="grid gap-6 lg:grid-cols-[20rem_minmax(0,1fr)] 2xl:grid-cols-[24rem_minmax(0,1fr)]">
       <aside className="lg:sticky lg:top-24 lg:self-start">
+      {attempt.status === "graded" && <ResultSound attemptId={attempt.id} pct={pct} submittedAt={attempt.submitted_at} />}
       <div className="card relative overflow-hidden p-6 text-center">
         <Mascot size={88} mood={pct >= 75 ? "party" : pct >= 40 ? "happy" : "think"} className="pop mx-auto" />
         <p className="mt-2 font-semibold text-ink-soft">{quiz?.title}</p>

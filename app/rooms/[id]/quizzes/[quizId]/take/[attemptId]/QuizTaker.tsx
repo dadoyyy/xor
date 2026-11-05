@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { startNavProgress } from "@/components/NavProgress";
+import { play } from "@/lib/sound";
 import Mascot from "@/components/Mascot";
 import QuizDoodles from "@/components/QuizDoodles";
 import { useFeedback } from "@/components/Feedback";
@@ -82,6 +83,19 @@ export default function QuizTaker(props: {
   }, [deadline]);
   const remaining = deadline ? Math.max(0, deadline - now) : null;
 
+  // timer sounds: a heads-up at 1 minute left, then a tick each of the last 10 seconds
+  const lastSec = useRef<number | null>(null);
+  useEffect(() => {
+    if (remaining == null) return;
+    const sec = Math.ceil(remaining / 1000);
+    if (lastSec.current === sec) return;
+    const prev = lastSec.current;
+    lastSec.current = sec;
+    if (prev == null) return; // don't beep on page load
+    if (sec === 60) play("warn");
+    else if (sec <= 10 && sec > 0) play("tick");
+  }, [remaining]);
+
   const submit = useCallback(
     async (auto = false) => {
       if (submittedRef.current) return;
@@ -98,6 +112,7 @@ export default function QuizTaker(props: {
         }
       }
       submittedRef.current = true;
+      play("submit");
       setSubmitting(true);
       setError(null);
       try {
@@ -226,7 +241,7 @@ export default function QuizTaker(props: {
           {error && <p className="mx-auto mt-4 w-full max-w-xl rounded-xl border-2 border-coral bg-coral-tint px-3 py-2 text-sm font-semibold">{error}</p>}
 
           <div className="mx-auto mt-6 flex w-full max-w-xl items-center justify-between gap-3">
-            <button className="btn" onClick={() => setI((k) => Math.max(0, k - 1))} disabled={i === 0}>
+            <button className="btn" data-sfx="none" onClick={() => { play("next"); setI((k) => Math.max(0, k - 1)); }} disabled={i === 0}>
               <ChevronLeft size={18} /> Back
             </button>
             {!isLast && (
@@ -239,7 +254,7 @@ export default function QuizTaker(props: {
                 Submit quiz
               </button>
             ) : (
-              <button className="btn btn-primary" onClick={() => setI((k) => k + 1)}>
+              <button className="btn btn-primary" data-sfx="none" onClick={() => { play("next"); setI((k) => k + 1); }}>
                 Next <ChevronRight size={18} />
               </button>
             )}
@@ -275,7 +290,11 @@ function Pill({
       type="button"
       role={role}
       aria-checked={selected}
-      onClick={onClick}
+      data-sfx="none"
+      onClick={() => {
+        play("select");
+        onClick();
+      }}
       className={`flex w-full items-center gap-3 rounded-2xl border-2 px-3 py-3 text-left font-semibold transition-all ${
         selected
           ? "border-grape bg-grape text-white shadow-[0_4px_0_var(--grape-deep)]"
@@ -384,6 +403,7 @@ function QuestionInput({ q, value, onChange }: { q: TakeQuestion; value: Respons
                 onChange={(e) => {
                   const next = Array.from({ length: left.length }, (_, j) => pairs[j] ?? null);
                   next[k] = e.target.value === "" ? null : Number(e.target.value);
+                  play("select");
                   onChange({ pairs: next });
                 }}
               >
