@@ -4,6 +4,9 @@ import Mascot from "@/components/Mascot";
 import DeleteButton from "@/components/DeleteButton";
 import { Plus } from "lucide-react";
 import LinkSpinner from "@/components/LinkSpinner";
+import MarkSeen from "@/components/MarkSeen";
+import { NewTag } from "@/components/Badges";
+import { getSeenAt, isNew } from "@/lib/seen";
 
 export const metadata = { title: "Flashcards" };
 
@@ -12,6 +15,7 @@ const DIFF_TINT: Record<string, string> = { easy: "bg-lilac", medium: "border-su
 export default async function Flashcards({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { supabase, user, isOwner } = await requireRoom(id);
+  const seenAt = await getSeenAt(supabase, id, user.id, "flashcards");
 
   const { data: decks } = await supabase
     .from("decks")
@@ -21,6 +25,7 @@ export default async function Flashcards({ params }: { params: Promise<{ id: str
 
   return (
     <div className="grid gap-6">
+      <MarkSeen roomId={id} section="flashcards" />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-2xl font-semibold">Flashcard decks</h2>
         <Link href={`/rooms/${id}/flashcards/new`} className="btn btn-sun">
@@ -45,7 +50,8 @@ export default async function Flashcards({ params }: { params: Promise<{ id: str
                 <span aria-hidden className="absolute -right-2 -top-2 -z-10 h-full w-full rounded-[22px] border-2 border-sun bg-sun-tint" />
                 <Link href={`/rooms/${id}/flashcards/${d.id}`} className="flex-1">
                   <p className="flex items-center gap-2 text-lg font-semibold leading-snug">
-                    <span>{d.title}</span> <LinkSpinner className="size-4 text-grape" />
+                    <span>{d.title}</span> <NewTag show={isNew(d.created_at, d.created_by, seenAt, user.id)} />
+                    <LinkSpinner className="size-4 text-grape" />
                   </p>
                   <p className="mt-1 text-sm text-ink-soft">
                     {count} cards · by {author}

@@ -1,11 +1,14 @@
 import { requireRoom } from "@/lib/auth";
 import MembersClient from "./MembersClient";
+import MarkSeen from "@/components/MarkSeen";
+import { getSeenAt, isNew } from "@/lib/seen";
 
 export const metadata = { title: "Members" };
 
 export default async function Members({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { supabase, room, user, isOwner } = await requireRoom(id);
+  const seenAt = await getSeenAt(supabase, id, user.id, "members");
 
   const { data } = await supabase
     .from("room_members")
@@ -18,6 +21,7 @@ export default async function Members({ params }: { params: Promise<{ id: string
     role: m.role as string,
     joinedAt: m.joined_at as string,
     username: (m.profiles as unknown as { username: string | null })?.username ?? "unknown",
+    isNew: isNew(m.joined_at as string, m.user_id as string, seenAt, user.id),
   }));
 
   let secretKey: string | null = null;
@@ -27,6 +31,8 @@ export default async function Members({ params }: { params: Promise<{ id: string
   }
 
   return (
+    <>
+    <MarkSeen roomId={id} section="members" />
     <MembersClient
       roomId={id}
       roomName={room.name}
@@ -36,5 +42,6 @@ export default async function Members({ params }: { params: Promise<{ id: string
       secretKey={secretKey}
       members={members}
     />
+    </>
   );
 }

@@ -3,9 +3,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useFeedback } from "@/components/Feedback";
+import { NewTag } from "@/components/Badges";
 import { Check, Copy, Crown, Eye, EyeOff, LogOut, RefreshCw, Trash2, UserMinus, UserPlus } from "lucide-react";
 
-type Member = { userId: string; role: string; joinedAt: string; username: string };
+type Member = { userId: string; role: string; joinedAt: string; username: string; isNew?: boolean };
 
 // soft avatar colors, picked from the username so each person keeps theirs
 const AVATARS = [
@@ -221,8 +222,11 @@ export default function MembersClient(props: {
                 {initials(m.username)}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate font-bold">
-                  {m.username} {m.userId === meId && <span className="font-semibold text-ink-soft">(you)</span>}
+                <p className="flex items-center gap-2 font-bold">
+                  <span className="truncate">
+                    {m.username} {m.userId === meId && <span className="font-semibold text-ink-soft">(you)</span>}
+                  </span>
+                  <NewTag show={!!m.isNew} />
                 </p>
                 <p className="text-xs text-ink-soft">Joined {joined(m.joinedAt)}</p>
               </div>

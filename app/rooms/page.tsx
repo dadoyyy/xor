@@ -42,6 +42,11 @@ export default async function Rooms({ searchParams }: { searchParams: Promise<{ 
     for (const r of all ?? []) counts.set(r.room_id, (counts.get(r.room_id) ?? 0) + 1);
   }
 
+  // "N new" per room (needs migration 003; quietly skipped if not installed)
+  const newCounts = new Map<string, number>();
+  const { data: upd, error: updErr } = await supabase.rpc("rooms_with_updates");
+  if (!updErr && Array.isArray(upd)) for (const u of upd as { room_id: string; total: number }[]) newCounts.set(u.room_id, Number(u.total) || 0);
+
   const rooms = (memberships ?? []).map((m) => ({
     role: m.role as string,
     cover: null as string | null,
@@ -77,7 +82,17 @@ export default async function Rooms({ searchParams }: { searchParams: Promise<{ 
                   href={`/rooms/${r.id}`}
                   className="card card-link flex h-full items-center gap-4 p-4 pr-14 sm:block sm:p-5"
                 >
-                  <RoomCover cover={r.cover} roomId={r.id} name={r.name} className="size-16 shrink-0 sm:mb-4 sm:h-24 sm:w-auto" big={false} />
+                  <div className="relative shrink-0 sm:mb-4">
+                    <RoomCover cover={r.cover} roomId={r.id} name={r.name} className="size-16 sm:h-24 sm:w-auto" />
+                    {(newCounts.get(r.id) ?? 0) > 0 && (
+                      <span
+                        className="pop absolute -left-1.5 -top-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-display text-xs font-bold text-white sm:left-2 sm:top-2"
+                        style={{ background: "var(--coral)", boxShadow: "0 0 0 2px #fff" }}
+                      >
+                        {(newCounts.get(r.id) ?? 0) > 9 ? "9+" : newCounts.get(r.id)} new
+                      </span>
+                    )}
+                  </div>
                   <div className="min-w-0 flex-1">
                     <h2 className="flex items-center gap-2 text-xl font-semibold">
                       <span className="truncate">{r.name}</span>

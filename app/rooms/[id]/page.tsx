@@ -1,5 +1,7 @@
 import { requireRoom } from "@/lib/auth";
 import MaterialsClient, { type MaterialRow } from "./MaterialsClient";
+import MarkSeen from "@/components/MarkSeen";
+import { getSeenAt, isNew } from "@/lib/seen";
 
 export default async function RoomHome({
   params,
@@ -11,6 +13,7 @@ export default async function RoomHome({
   const { id } = await params;
   const { created } = await searchParams;
   const { supabase, user, isOwner } = await requireRoom(id);
+  const seenAt = await getSeenAt(supabase, id, user.id, "materials");
 
   const { data } = await supabase
     .from("materials")
@@ -30,9 +33,13 @@ export default async function RoomHome({
     uploader: (m.profiles as unknown as { username: string | null })?.username ?? "someone",
     createdAt: m.created_at,
     processingStartedAt: m.processing_started_at,
+    isNew: isNew(m.created_at, m.uploaded_by, seenAt, user.id),
   }));
 
   return (
-    <MaterialsClient roomId={id} meId={user.id} isOwner={isOwner} materials={materials} justCreated={created === "1" && isOwner} />
+    <>
+      <MarkSeen roomId={id} section="materials" />
+      <MaterialsClient roomId={id} meId={user.id} isOwner={isOwner} materials={materials} justCreated={created === "1" && isOwner} />
+    </>
   );
 }

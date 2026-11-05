@@ -5,6 +5,9 @@ import DeleteButton from "@/components/DeleteButton";
 import { qtypeLabel } from "@/lib/questions";
 import { Plus, Timer } from "lucide-react";
 import LinkSpinner from "@/components/LinkSpinner";
+import MarkSeen from "@/components/MarkSeen";
+import { NewTag } from "@/components/Badges";
+import { getSeenAt, isNew } from "@/lib/seen";
 
 export const metadata = { title: "Quizzes" };
 
@@ -13,6 +16,7 @@ const DIFF_TINT: Record<string, string> = { easy: "bg-lilac", medium: "border-su
 export default async function Quizzes({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { supabase, user, isOwner, room } = await requireRoom(id);
+  const seenAt = await getSeenAt(supabase, id, user.id, "quizzes");
 
   const [{ data: quizzes }, { data: mine }] = await Promise.all([
     supabase
@@ -35,6 +39,7 @@ export default async function Quizzes({ params }: { params: Promise<{ id: string
 
   return (
     <div className="grid gap-6">
+      <MarkSeen roomId={id} section="quizzes" />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-2xl font-semibold">Quizzes</h2>
         <Link href={`/rooms/${id}/quizzes/new`} className="btn btn-sun">
@@ -57,7 +62,8 @@ export default async function Quizzes({ params }: { params: Promise<{ id: string
               <li key={q.id} className="card card-link flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
                 <Link href={`/rooms/${id}/quizzes/${q.id}`} className="min-w-0 flex-1">
                   <p className="flex items-center gap-2 text-lg font-semibold leading-snug">
-                    <span>{q.title}</span> <LinkSpinner className="size-4 text-grape" />
+                    <span>{q.title}</span> <NewTag show={isNew(q.created_at, q.created_by, seenAt, user.id)} />
+                    <LinkSpinner className="size-4 text-grape" />
                   </p>
                   <p className="mt-0.5 text-sm text-ink-soft">
                     {q.question_count} questions · by {author} · {(q.question_types as string[]).map(qtypeLabel).join(", ")}

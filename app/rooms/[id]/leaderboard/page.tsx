@@ -1,6 +1,7 @@
 import { requireRoom } from "@/lib/auth";
 import Leaderboard from "@/components/Leaderboard";
 import ResetVote from "./ResetVote";
+import MarkSeen from "@/components/MarkSeen";
 
 export const metadata = { title: "Leaderboard" };
 
@@ -42,6 +43,7 @@ export default async function RoomLeaderboard({ params }: { params: Promise<{ id
 
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+      <MarkSeen roomId={id} section="leaderboard" />
       <section>
         <h2 className="text-2xl font-semibold">Room leaderboard</h2>
         <p className="mb-2 mt-1 text-sm text-ink-soft">

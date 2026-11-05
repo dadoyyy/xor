@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import Mascot from "@/components/Mascot";
 import Markdown from "@/components/Markdown";
 import { useFeedback } from "@/components/Feedback";
+import { NewTag } from "@/components/Badges";
 import { AlertTriangle, BookOpen, CheckCircle2, ExternalLink, FileUp, Loader2, RotateCw, Trash2, X } from "lucide-react";
 
 export type MaterialRow = {
@@ -20,6 +21,7 @@ export type MaterialRow = {
   uploader: string;
   createdAt: string;
   processingStartedAt: string | null;
+  isNew?: boolean;
 };
 
 const MAX_BYTES = 50 * 1024 * 1024;
@@ -233,7 +235,9 @@ export default function MaterialsClient({
             return (
               <li key={m.id} className="card-flat flex flex-col gap-3 p-4 sm:flex-row sm:items-center 2xl:flex-col 2xl:items-stretch">
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-bold">{m.title}</p>
+                  <p className="flex items-center gap-2 font-bold">
+                    <span className="truncate">{m.title}</span> <NewTag show={!!m.isNew} />
+                  </p>
                   <p className="text-xs text-ink-soft">
                     {m.uploader} · {new Date(m.createdAt).toLocaleDateString()}
                     {m.pageCount ? ` · ${m.pageCount} pages` : ""}

@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import TopBar from "@/components/TopBar";
 import RoomTabs from "./RoomTabs";
+import { useRoomUpdates } from "@/lib/useRoomUpdates";
+import { DotBadge } from "@/components/Badges";
 import { ChevronLeft, Crown, PanelLeft, X } from "lucide-react";
 
 const KEY = "xor-sidebar-open";
@@ -33,6 +35,7 @@ export default function RoomChrome({
   const path = usePathname();
   const [desktopOpen, setDesktopOpen] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const updates = useRoomUpdates(roomId);
 
   // remember the desktop choice on this browser
   useEffect(() => {
@@ -81,21 +84,30 @@ export default function RoomChrome({
           </span>
         )}
       </div>
-      <RoomTabs roomId={roomId} vertical />
+      <RoomTabs roomId={roomId} vertical updates={updates} />
     </div>
   );
+
+  // anything new outside the section I'm looking at?
+  const base = `/rooms/${roomId}`;
+  const current =
+    path === base ? "materials" : (["flashcards", "quizzes", "leaderboard", "members"] as const).find((s) => path.startsWith(`${base}/${s}`));
+  const otherNew = Object.entries(updates).some(([sec, n]) => sec !== current && (n ?? 0) > 0);
 
   const toggleButton = (
     <button
       type="button"
       onClick={toggle}
-      className="btn btn-ghost btn-sm"
+      className="btn btn-ghost btn-sm relative"
       style={{ marginLeft: "-0.5rem", paddingLeft: "0.5rem", paddingRight: "0.5rem" }}
       aria-label="Toggle sidebar"
       aria-controls="room-sidebar room-drawer"
       aria-expanded={drawerOpen || desktopOpen}
     >
       <PanelLeft size={20} />
+      {/* new stuff while the sidebar is hidden: phones always, desktop when collapsed */}
+      <DotBadge show={otherNew && !drawerOpen} className="right-0.5 top-0.5 lg:hidden" />
+      <DotBadge show={otherNew && !desktopOpen} className="right-0.5 top-0.5 hidden lg:block" />
     </button>
   );
 
