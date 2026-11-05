@@ -4,6 +4,7 @@ import "@fontsource-variable/nunito";
 import "./globals.css";
 import RegisterSW from "@/components/RegisterSW";
 import { FeedbackProvider } from "@/components/Feedback";
+import NavProgress from "@/components/NavProgress";
 
 export const metadata: Metadata = {
   title: { default: "xor", template: "%s · xor" },
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="antialiased">
+        <NavProgress />
         <FeedbackProvider>{children}</FeedbackProvider>
         <RegisterSW />
       </body>

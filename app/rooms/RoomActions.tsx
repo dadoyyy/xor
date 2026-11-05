@@ -1,17 +1,18 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNav } from "@/lib/useNav";
 import { createClient } from "@/lib/supabase/client";
 import { KeyRound, Plus } from "lucide-react";
 
 export default function RoomActions() {
   const supabase = createClient();
-  const router = useRouter();
+  const { go, pending } = useNav();
   const [tab, setTab] = useState<"join" | "create">("join");
   const [key, setKey] = useState("");
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [working, setBusy] = useState(false);
+  const busy = working || pending;
   const [error, setError] = useState<string | null>(null);
 
   async function join(e: React.FormEvent) {
@@ -22,7 +23,7 @@ export default function RoomActions() {
     setBusy(false);
     if (error) return setError(error.message);
     if (!data) return setError("No room matches that key. Double-check it with the room owner.");
-    router.push(`/rooms/${data}`);
+    go(`/rooms/${data}`);
   }
 
   async function create(e: React.FormEvent) {
@@ -32,7 +33,7 @@ export default function RoomActions() {
     const { data, error } = await supabase.rpc("create_room", { p_name: name, p_description: desc || null });
     setBusy(false);
     if (error) return setError(error.message);
-    router.push(`/rooms/${data}?created=1`);
+    go(`/rooms/${data}?created=1`);
   }
 
   return (
@@ -79,7 +80,7 @@ export default function RoomActions() {
           />
           <button className="btn btn-primary" disabled={busy || key.replace(/[^a-z0-9]/gi, "").length < 8}>
             {busy && <span className="spinner" aria-hidden />}
-            {busy ? "Checking…" : "Join room"}
+            {pending ? "Opening room…" : busy ? "Checking…" : "Join room"}
           </button>
         </form>
       ) : (
@@ -113,7 +114,7 @@ export default function RoomActions() {
           </div>
           <button className="btn btn-primary" disabled={busy || !name.trim()}>
             {busy && <span className="spinner" aria-hidden />}
-            {busy ? "Creating…" : "Create room"}
+            {pending ? "Opening room…" : busy ? "Creating…" : "Create room"}
           </button>
         </form>
       )}

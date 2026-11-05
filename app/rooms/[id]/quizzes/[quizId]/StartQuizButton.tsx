@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { startNavProgress } from "@/components/NavProgress";
 
 export default function StartQuizButton({ quizId, roomId, label }: { quizId: string; roomId: string; label: string }) {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function StartQuizButton({ quizId, roomId, label }: { quizId: str
       setBusy(false);
       return;
     }
+    startNavProgress();
     router.push(`/rooms/${roomId}/quizzes/${quizId}/take/${body.id}`);
   }
 

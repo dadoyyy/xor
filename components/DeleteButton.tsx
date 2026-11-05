@@ -1,8 +1,8 @@
 "use client";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useFeedback } from "@/components/Feedback";
+import { useNav } from "@/lib/useNav";
 import { Trash2 } from "lucide-react";
 
 /** Deletes a row the user is allowed to delete (RLS checks creator/owner). */
@@ -19,8 +19,9 @@ export default function DeleteButton({
   confirmText: string;
   redirectTo?: string;
 }) {
-  const router = useRouter();
-  const [busy, setBusy] = useState(false);
+  const { go, pending, router } = useNav();
+  const [working, setBusy] = useState(false);
+  const busy = working || pending;
   const { confirm, toast } = useFeedback();
   return (
     <button
@@ -33,11 +34,14 @@ export default function DeleteButton({
         if (!ok) return;
         setBusy(true);
         const { error } = await createClient().from(table).delete().eq("id", id);
-        setBusy(false);
+        if (error) setBusy(false);
         if (error) return toast({ kind: "error", title: `Couldn't delete the ${what}`, body: error.message });
         toast({ title: what === "deck" ? "Deck deleted" : "Quiz deleted" });
-        if (redirectTo) router.replace(redirectTo);
-        router.refresh();
+        if (redirectTo) go(redirectTo, { replace: true, refresh: true });
+        else {
+          router.refresh();
+          setBusy(false);
+        }
       }}
     >
       {busy ? <span className="spinner" aria-hidden /> : <Trash2 size={16} />}

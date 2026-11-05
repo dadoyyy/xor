@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { startNavProgress } from "@/components/NavProgress";
 import MaterialPicker, { ChipGroup, type PickableMaterial } from "@/components/MaterialPicker";
 import Mascot from "@/components/Mascot";
 import { QUESTION_TYPES, type QType } from "@/lib/questions";
@@ -44,6 +45,7 @@ export default function NewQuizForm({ roomId, materials }: { roomId: string; mat
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || "Couldn't make the quiz.");
+      startNavProgress();
       router.push(`/rooms/${roomId}/quizzes/${body.id}`);
       router.refresh();
     } catch (err) {

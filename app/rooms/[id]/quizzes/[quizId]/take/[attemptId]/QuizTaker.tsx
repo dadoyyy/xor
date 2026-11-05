@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { startNavProgress } from "@/components/NavProgress";
 import Mascot from "@/components/Mascot";
 import QuizDoodles from "@/components/QuizDoodles";
 import { useFeedback } from "@/components/Feedback";
@@ -110,6 +111,7 @@ export default function QuizTaker(props: {
         try {
           localStorage.removeItem(storageKey);
         } catch {}
+        startNavProgress();
         router.replace(`/rooms/${roomId}/quizzes/${quizId}/results/${attemptId}`);
         router.refresh();
       } catch (e) {

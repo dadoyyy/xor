@@ -1,14 +1,15 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNav } from "@/lib/useNav";
 import { createClient } from "@/lib/supabase/client";
 import AuthShell from "@/components/AuthShell";
 
 export default function ResetPassword() {
   const supabase = createClient();
-  const router = useRouter();
+  const { go, pending } = useNav();
   const [password, setPassword] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [working, setBusy] = useState(false);
+  const busy = working || pending;
   const [error, setError] = useState<string | null>(null);
 
   async function submit(e: React.FormEvent) {
@@ -18,7 +19,7 @@ export default function ResetPassword() {
     const { error } = await supabase.auth.updateUser({ password });
     setBusy(false);
     if (error) return setError(error.message);
-    router.replace("/rooms");
+    go("/rooms", { replace: true });
   }
 
   return (

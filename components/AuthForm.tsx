@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useNav } from "@/lib/useNav";
 import { createClient } from "@/lib/supabase/client";
 import AuthShell from "@/components/AuthShell";
 
@@ -20,12 +21,13 @@ function GoogleIcon() {
 
 export default function AuthForm({ mode }: { mode: Mode }) {
   const supabase = createClient();
-  const router = useRouter();
+  const { go, pending } = useNav();
   const params = useSearchParams();
   const next = params.get("next") || "/rooms";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [working, setBusy] = useState(false);
+  const busy = working || pending;
   const [error, setError] = useState<string | null>(params.get("error"));
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -53,8 +55,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
       if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        router.replace(next);
-        router.refresh();
+        go(next, { replace: true, refresh: true });
       } else if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -63,8 +64,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
         });
         if (error) throw error;
         if (data.session) {
-          router.replace("/onboarding");
-          router.refresh();
+          go("/onboarding", { replace: true, refresh: true });
         } else {
           setNotice("Check your email for a confirmation link, then come back here.");
         }

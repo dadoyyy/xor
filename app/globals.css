@@ -312,3 +312,11 @@ h1, h2, h3, .font-display {
 @media (min-width: 640px) {
   .notes-sheet { height: auto; max-height: min(88dvh, 60rem); padding-bottom: 0; border: 2px solid var(--line); box-shadow: 0 24px 60px -24px rgba(91, 33, 182, 0.35); overflow: hidden; }
 }
+/* top navigation progress bar: quick start, then slows down while waiting */
+@keyframes nav-bar-grow {
+  0% { width: 0%; }
+  20% { width: 45%; }
+  60% { width: 75%; }
+  100% { width: 92%; }
+}
+.nav-bar-grow { animation: nav-bar-grow 8s cubic-bezier(0.1, 0.7, 0.3, 1) forwards; }

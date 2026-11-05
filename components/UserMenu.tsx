@@ -1,14 +1,15 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNav } from "@/lib/useNav";
 import { createClient } from "@/lib/supabase/client";
 import { ChevronDown, LogOut, UserPen } from "lucide-react";
 
 export default function UserMenu({ username }: { username: string }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const router = useRouter();
+  const { go, pending } = useNav();
+  const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
     const close = (e: MouseEvent) => {
@@ -19,9 +20,9 @@ export default function UserMenu({ username }: { username: string }) {
   }, []);
 
   async function logout() {
+    setLeaving(true);
     await createClient().auth.signOut();
-    router.replace("/");
-    router.refresh();
+    go("/", { replace: true, refresh: true });
   }
 
   return (
@@ -38,8 +39,8 @@ export default function UserMenu({ username }: { username: string }) {
           <Link href="/onboarding" className="flex items-center gap-2 rounded-xl px-3 py-2 font-semibold hover:bg-grape-tint">
             <UserPen size={18} /> Change username
           </Link>
-          <button onClick={logout} className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left font-semibold hover:bg-lilac">
-            <LogOut size={18} /> Log out
+          <button onClick={logout} disabled={leaving || pending} className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left font-semibold hover:bg-lilac">
+            {leaving || pending ? <span className="spinner" aria-hidden /> : <LogOut size={18} />} {leaving || pending ? "Logging out…" : "Log out"}
           </button>
         </div>
       )}

@@ -1,13 +1,14 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNav } from "@/lib/useNav";
 import { createClient } from "@/lib/supabase/client";
 
 export default function UsernameForm({ current }: { current: string }) {
   const supabase = createClient();
-  const router = useRouter();
+  const { go, pending } = useNav();
   const [name, setName] = useState(current);
-  const [busy, setBusy] = useState(false);
+  const [working, setBusy] = useState(false);
+  const busy = working || pending;
   const [error, setError] = useState<string | null>(null);
   const valid = /^[A-Za-z0-9_]{3,20}$/.test(name);
 
@@ -25,8 +26,7 @@ export default function UsernameForm({ current }: { current: string }) {
       setError(error.code === "23505" ? "That username is taken. Try another." : error.message);
       return;
     }
-    router.replace("/rooms");
-    router.refresh();
+    go("/rooms", { replace: true, refresh: true });
   }
 
   return (

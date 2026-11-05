@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNav } from "@/lib/useNav";
 import { createClient } from "@/lib/supabase/client";
 import { useFeedback } from "@/components/Feedback";
 import { NewTag } from "@/components/Badges";
@@ -38,11 +38,13 @@ export default function MembersClient(props: {
 }) {
   const { roomId, meId, isOwner, members } = props;
   const supabase = createClient();
-  const router = useRouter();
+  const { go, pending, router } = useNav();
+  const [navLabel, setNavLabel] = useState<string | null>(null);
   const [key, setKey] = useState(props.secretKey);
   const [showKey, setShowKey] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [busy, setBusy] = useState<string | null>(null);
+  const [working, setBusy] = useState<string | null>(null);
+  const busy = working ?? (pending ? navLabel : null);
   const { confirm, toast } = useFeedback();
   const [name, setName] = useState(props.roomName);
   const [desc, setDesc] = useState(props.roomDescription);
@@ -108,8 +110,8 @@ export default function MembersClient(props: {
       if (!ok) return;
       const { error } = await supabase.rpc("remove_member", { p_room: roomId, p_user: meId });
       if (error) throw error;
-      router.replace("/rooms");
-      router.refresh();
+      setNavLabel("leave");
+      go("/rooms", { replace: true, refresh: true });
     });
 
   const save = (e: React.FormEvent) => {
@@ -136,8 +138,8 @@ export default function MembersClient(props: {
       if (!ok) return;
       const res = await fetch(`/api/rooms/${roomId}`, { method: "DELETE" });
       if (!res.ok) throw new Error((await res.json()).error);
-      router.replace("/rooms");
-      router.refresh();
+      setNavLabel("delete");
+      go("/rooms", { replace: true, refresh: true });
     });
 
   const joined = (d: string) => new Date(d).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
@@ -297,7 +299,7 @@ export default function MembersClient(props: {
               <p className="mt-0.5 text-sm text-ink-soft">Deleting the room removes its files, quizzes, flashcards and leaderboards for everyone.</p>
             </div>
             <button type="button" className="btn btn-danger btn-sm shrink-0" onClick={deleteRoom} disabled={!!busy}>
-              <Trash2 size={16} /> Delete room
+              {busy === "delete" ? <span className="spinner" aria-hidden /> : <Trash2 size={16} />} {busy === "delete" ? "Deleting…" : "Delete room"}
             </button>
           </div>
         </section>
@@ -308,7 +310,7 @@ export default function MembersClient(props: {
             <p className="text-sm text-ink-soft">You&apos;ll need the secret key to come back. Your scores stay on the leaderboard.</p>
           </div>
           <button className="btn btn-sm" onClick={leave} disabled={!!busy}>
-            <LogOut size={16} /> Leave room
+            {busy === "leave" ? <span className="spinner" aria-hidden /> : <LogOut size={16} />} {busy === "leave" ? "Leaving…" : "Leave room"}
           </button>
         </section>
       )}
