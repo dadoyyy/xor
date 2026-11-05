@@ -1,10 +1,12 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useNav } from "@/lib/useNav";
 import { createClient } from "@/lib/supabase/client";
 import AuthShell from "@/components/AuthShell";
+import { detectInApp, openInBrowserHref, type InApp } from "@/lib/inAppBrowser";
+import { Check, Copy, ExternalLink, TriangleAlert } from "lucide-react";
 
 type Mode = "login" | "signup" | "forgot";
 
@@ -30,10 +32,33 @@ export default function AuthForm({ mode }: { mode: Mode }) {
   const busy = working || pending;
   const [error, setError] = useState<string | null>(params.get("error"));
   const [notice, setNotice] = useState<string | null>(null);
+  const [inApp, setInApp] = useState<InApp>(null);
+  const [showOpenOut, setShowOpenOut] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const found = detectInApp(navigator.userAgent);
+    setInApp(found);
+    // came back from a failed Google sign-in inside an app's browser: explain right away
+    if (found && params.get("error")) setShowOpenOut(true);
+  }, [params]);
+
+  async function copyLink() {
+    try {
+      await navigator.clipboard.writeText(location.origin + location.pathname);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {}
+  }
 
   const callback = (to: string) => `${window.location.origin}/auth/callback?next=${encodeURIComponent(to)}`;
 
   async function google() {
+    // Google sign-in doesn't work inside Messenger/Instagram/etc. browsers
+    if (inApp) {
+      setShowOpenOut(true);
+      return;
+    }
     setBusy(true);
     setError(null);
     const { error } = await supabase.auth.signInWithOAuth({
@@ -102,6 +127,36 @@ export default function AuthForm({ mode }: { mode: Mode }) {
             <button type="button" onClick={google} disabled={busy} className="btn mt-6 w-full">
               <GoogleIcon /> Continue with Google
             </button>
+            {showOpenOut && inApp && (
+              <div className="pop mt-3 rounded-2xl border-2 border-sun bg-sun-tint p-4" role="alert">
+                <p className="flex items-start gap-2 font-display font-semibold">
+                  <TriangleAlert size={18} className="mt-0.5 shrink-0 text-sun-deep" />
+                  Google sign-in doesn&apos;t work inside {inApp.app}
+                </p>
+                <p className="mt-1 text-sm text-ink-soft">
+                  Open xor in {inApp.android ? "Chrome" : inApp.ios ? "Safari" : "your phone's browser"} and tap Continue with Google there. Or log in
+                  with email below, which works here.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {(() => {
+                    const href = typeof window !== "undefined" ? openInBrowserHref(location.origin + location.pathname, inApp) : null;
+                    return href ? (
+                      <a href={href} className="btn btn-primary btn-sm">
+                        <ExternalLink size={16} /> Open in {inApp.android ? "Chrome" : "Safari"}
+                      </a>
+                    ) : null;
+                  })()}
+                  <button type="button" onClick={copyLink} className="btn btn-sm">
+                    {copied ? <Check size={16} /> : <Copy size={16} />} {copied ? "Link copied" : "Copy link"}
+                  </button>
+                </div>
+                {inApp.ios && (
+                  <p className="mt-2 text-xs text-ink-soft">
+                    If nothing opens: tap the ••• or share button in {inApp.app}, then choose &quot;Open in Safari&quot; (or paste the link there).
+                  </p>
+                )}
+              </div>
+            )}
             <div className="my-5 flex items-center gap-3 text-sm font-bold text-ink-soft">
               <span className="h-0.5 flex-1 rounded bg-line/20" />
               or with email
@@ -144,7 +199,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
             </div>
           )}
 
-          {error && <p className="rounded-xl border-2 border-coral bg-coral-tint px-3 py-2 text-sm font-semibold">{error}</p>}
+          {error && !(showOpenOut && inApp) && <p className="rounded-xl border-2 border-coral bg-coral-tint px-3 py-2 text-sm font-semibold">{error}</p>}
           {notice && <p className="rounded-xl border-2 border-mint bg-mint-tint px-3 py-2 text-sm font-semibold">{notice}</p>}
 
           <button type="submit" disabled={busy} className="btn btn-primary w-full">
