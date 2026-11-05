@@ -78,6 +78,7 @@ export default function RoomActions() {
             required
           />
           <button className="btn btn-primary" disabled={busy || key.replace(/[^a-z0-9]/gi, "").length < 8}>
+            {busy && <span className="spinner" aria-hidden />}
             {busy ? "Checking…" : "Join room"}
           </button>
         </form>
@@ -111,6 +112,7 @@ export default function RoomActions() {
             />
           </div>
           <button className="btn btn-primary" disabled={busy || !name.trim()}>
+            {busy && <span className="spinner" aria-hidden />}
             {busy ? "Creating…" : "Create room"}
           </button>
         </form>

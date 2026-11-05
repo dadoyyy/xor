@@ -148,6 +148,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
           {notice && <p className="rounded-xl border-2 border-mint bg-mint-tint px-3 py-2 text-sm font-semibold">{notice}</p>}
 
           <button type="submit" disabled={busy} className="btn btn-primary w-full">
+            {busy && <span className="spinner" aria-hidden />}
             {busy ? "One sec…" : mode === "login" ? "Log in" : mode === "signup" ? "Sign up" : "Send reset link"}
           </button>
         </form>

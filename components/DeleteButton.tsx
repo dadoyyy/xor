@@ -40,7 +40,7 @@ export default function DeleteButton({
         router.refresh();
       }}
     >
-      <Trash2 size={16} />
+      {busy ? <span className="spinner" aria-hidden /> : <Trash2 size={16} />}
     </button>
   );
 }

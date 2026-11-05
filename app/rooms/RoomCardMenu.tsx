@@ -78,7 +78,7 @@ export default function RoomCardMenu({ room, meId, coversEnabled }: { room: Room
       </button>
 
       {open && (
-        <div role="menu" className="card pop absolute right-0 mt-2 w-48 p-1.5" style={{ zIndex: 6 }}>
+        <div role="menu" className="card menu-in absolute right-0 mt-2 w-48 p-1.5" style={{ zIndex: 6 }}>
           {isOwner ? (
             <>
               <button
@@ -143,7 +143,7 @@ function EditRoomDialog({ room, coversEnabled, onClose }: { room: Room; coversEn
 
   return (
     <div className="fixed inset-0 grid place-items-center overflow-y-auto p-4" style={{ zIndex: 70 }}>
-      <div className="fixed inset-0" style={{ background: "rgba(43, 37, 69, 0.35)" }} onClick={() => !busy && onClose()} />
+      <div className="fade-in fixed inset-0" style={{ background: "rgba(43, 37, 69, 0.35)" }} onClick={() => !busy && onClose()} />
       <form
         onSubmit={save}
         role="dialog"
@@ -233,6 +233,7 @@ function EditRoomDialog({ room, coversEnabled, onClose }: { room: Room; coversEn
             Cancel
           </button>
           <button className="btn btn-primary" disabled={busy || !name.trim()}>
+            {busy && <span className="spinner" aria-hidden />}
             {busy ? "Saving…" : "Save changes"}
           </button>
         </div>

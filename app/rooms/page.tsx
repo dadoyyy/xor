@@ -5,6 +5,7 @@ import Mascot from "@/components/Mascot";
 import RoomsHeader from "./RoomsHeader";
 import RoomCardMenu from "./RoomCardMenu";
 import RoomCover from "@/components/RoomCover";
+import LinkSpinner from "@/components/LinkSpinner";
 import { Crown, Users } from "lucide-react";
 
 export const metadata = { title: "Your rooms" };
@@ -74,11 +75,14 @@ export default async function Rooms({ searchParams }: { searchParams: Promise<{ 
               <li key={r.id} className="relative">
                 <Link
                   href={`/rooms/${r.id}`}
-                  className="card flex h-full items-center gap-4 p-4 pr-14 transition-transform hover:-translate-y-1 sm:block sm:p-5"
+                  className="card card-link flex h-full items-center gap-4 p-4 pr-14 sm:block sm:p-5"
                 >
                   <RoomCover cover={r.cover} roomId={r.id} name={r.name} className="size-16 shrink-0 sm:mb-4 sm:h-24 sm:w-auto" big={false} />
                   <div className="min-w-0 flex-1">
-                    <h2 className="truncate text-xl font-semibold">{r.name}</h2>
+                    <h2 className="flex items-center gap-2 text-xl font-semibold">
+                      <span className="truncate">{r.name}</span>
+                      <LinkSpinner className="size-4 text-grape" />
+                    </h2>
                     {r.description && <p className="mt-1 line-clamp-2 text-sm text-ink-soft">{r.description}</p>}
                     <div className="mt-2 flex items-center gap-2 text-sm font-bold text-ink-soft sm:mt-4">
                       <span className="chip">

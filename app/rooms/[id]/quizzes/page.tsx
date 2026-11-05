@@ -4,6 +4,7 @@ import Mascot from "@/components/Mascot";
 import DeleteButton from "@/components/DeleteButton";
 import { qtypeLabel } from "@/lib/questions";
 import { Plus, Timer } from "lucide-react";
+import LinkSpinner from "@/components/LinkSpinner";
 
 export const metadata = { title: "Quizzes" };
 
@@ -53,9 +54,11 @@ export default async function Quizzes({ params }: { params: Promise<{ id: string
             const mineScore = firstScore.get(q.id);
             const author = (q.profiles as unknown as { username: string | null })?.username ?? "someone";
             return (
-              <li key={q.id} className="card flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
+              <li key={q.id} className="card card-link flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
                 <Link href={`/rooms/${id}/quizzes/${q.id}`} className="min-w-0 flex-1">
-                  <p className="text-lg font-semibold leading-snug">{q.title}</p>
+                  <p className="flex items-center gap-2 text-lg font-semibold leading-snug">
+                    <span>{q.title}</span> <LinkSpinner className="size-4 text-grape" />
+                  </p>
                   <p className="mt-0.5 text-sm text-ink-soft">
                     {q.question_count} questions · by {author} · {(q.question_types as string[]).map(qtypeLabel).join(", ")}
                   </p>

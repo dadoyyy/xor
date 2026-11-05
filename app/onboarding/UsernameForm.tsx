@@ -47,7 +47,8 @@ export default function UsernameForm({ current }: { current: string }) {
       <p className="text-xs text-ink-soft">3–20 letters, numbers or underscores.</p>
       {error && <p className="rounded-xl border-2 border-coral bg-coral-tint px-3 py-2 text-sm font-semibold">{error}</p>}
       <button className="btn btn-primary mt-2" disabled={!valid || busy}>
-        {busy ? "Saving…" : "Save username"}
+        {busy && <span className="spinner" aria-hidden />}
+            {busy ? "Saving…" : "Save username"}
       </button>
     </form>
   );

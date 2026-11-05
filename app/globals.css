@@ -100,16 +100,26 @@ h1, h2, h3, .font-display {
     border-radius: 999px;
     padding: 0.6rem 1.15rem;
     box-shadow: 0 4px 0 var(--edge);
-    transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease;
+    transition:
+      transform 0.12s cubic-bezier(0.3, 0.7, 0.4, 1),
+      box-shadow 0.12s cubic-bezier(0.3, 0.7, 0.4, 1),
+      background-color 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease,
+      opacity 0.15s ease;
     background: var(--paper);
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
     color: var(--ink);
     cursor: pointer;
     white-space: nowrap;
   }
-  .btn:hover:not(:disabled) { background-color: var(--lilac); }
+  .btn:hover:not(:disabled) { background-color: var(--lilac); transform: translateY(-1px); box-shadow: 0 5px 0 var(--edge); }
   .btn:active:not(:disabled) {
     transform: translateY(3px);
     box-shadow: 0 1px 0 var(--edge);
+    transition-duration: 0.05s;
   }
   .btn:disabled {
     opacity: 0.5;
@@ -123,8 +133,11 @@ h1, h2, h3, .font-display {
   .btn-danger:hover:not(:disabled) { background: #d63c41; }
   .btn-ghost { box-shadow: none; border-color: transparent; background: transparent; }
   .btn-ghost:hover:not(:disabled) { background: var(--grape-tint); }
-  .btn-ghost:active:not(:disabled) { transform: none; box-shadow: none; }
+  .btn-ghost:hover:not(:disabled) { transform: none; box-shadow: none; }
+  .btn-ghost:active:not(:disabled) { transform: scale(0.96); box-shadow: none; }
   .btn-sm { padding: 0.35rem 0.85rem; font-size: 0.875rem; box-shadow: 0 3px 0 var(--edge); }
+  .btn-sm:hover:not(:disabled) { box-shadow: 0 4px 0 var(--edge); }
+  .btn-sm.btn-ghost, .btn-sm.btn-ghost:hover:not(:disabled) { box-shadow: none; }
 
   .input {
     width: 100%;
@@ -202,14 +215,70 @@ h1, h2, h3, .font-display {
 .bob { animation: bob 3.2s ease-in-out infinite; }
 
 @keyframes pop {
-  0% { transform: scale(0.6); opacity: 0; }
-  70% { transform: scale(1.08); opacity: 1; }
+  0% { transform: scale(0.92); opacity: 0; }
+  60% { transform: scale(1.02); opacity: 1; }
   100% { transform: scale(1); }
 }
-.pop { animation: pop 0.45s ease-out both; }
+.pop { animation: pop 0.22s cubic-bezier(0.3, 0.7, 0.4, 1) both; }
+
+/* ---- transitions that make the app feel instant ---- */
+
+/* every page and tab fades up softly when it appears */
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.page-in { animation: page-in 0.2s cubic-bezier(0.3, 0.7, 0.4, 1) both; }
+
+/* dimmed backdrops behind dialogs and drawers */
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+.fade-in { animation: fade-in 0.18s ease both; }
+
+/* dropdown menus grow from their button */
+@keyframes menu-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+.menu-in { animation: menu-in 0.14s cubic-bezier(0.3, 0.7, 0.4, 1) both; transform-origin: top right; }
+
+/* clickable cards lift on hover and press down on click */
+.card-link {
+  transition: transform 0.15s cubic-bezier(0.3, 0.7, 0.4, 1), box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.card-link:hover { transform: translateY(-3px); border-color: #d9ccff; }
+.card-link:active { transform: translateY(1px); transition-duration: 0.05s; }
+
+/* loading placeholders */
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
+}
+.skeleton {
+  border-radius: 14px;
+  background: linear-gradient(90deg, var(--lilac) 0%, #ece5ff 40%, var(--lilac) 80%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s linear infinite;
+}
+
+/* small spinner for buttons and links that are loading */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border-radius: 999px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  animation: spin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+
+/* inputs and chips ease their focus/hover colors */
+.input, .chip, .card-flat { transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease; }
 
 @media (prefers-reduced-motion: reduce) {
-  .bob, .pop { animation: none; }
-  .flip-inner { transition: none; }
-  .btn { transition: none; }
+  .bob, .pop, .page-in, .fade-in, .menu-in { animation: none; }
+  .skeleton { animation-duration: 3s; }
+  .flip-inner, .btn, .card-link { transition: none; }
+  .btn:hover:not(:disabled), .card-link:hover { transform: none; }
 }

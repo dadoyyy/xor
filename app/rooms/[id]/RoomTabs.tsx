@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import LinkSpinner from "@/components/LinkSpinner";
 import { FileText, Layers, ListChecks, Trophy, Users } from "lucide-react";
 
 export default function RoomTabs({ roomId, vertical = false }: { roomId: string; vertical?: boolean }) {
@@ -25,11 +26,12 @@ export default function RoomTabs({ roomId, vertical = false }: { roomId: string;
                 <Link
                   href={href}
                   aria-current={active ? "page" : undefined}
-                  className={`flex items-center gap-3 rounded-2xl px-3.5 py-2.5 font-display font-semibold transition-colors ${
+                  className={`flex items-center gap-3 rounded-2xl px-3.5 py-2.5 font-display font-semibold transition-all duration-150 active:scale-[0.98] ${
                     active ? "bg-grape text-white shadow-[0_4px_0_var(--grape-deep)]" : "text-ink hover:bg-white"
                   }`}
                 >
-                  <Icon size={18} /> {label}
+                  <Icon size={18} /> <span className="flex-1">{label}</span>
+                  <LinkSpinner className="size-3.5" />
                 </Link>
               </li>
             );
@@ -47,6 +49,7 @@ export default function RoomTabs({ roomId, vertical = false }: { roomId: string;
             <li key={href}>
               <Link href={href} aria-current={active ? "page" : undefined} className={`btn btn-sm ${active ? "btn-primary" : ""}`}>
                 <Icon size={16} /> {label}
+                <LinkSpinner className="size-3" />
               </Link>
             </li>
           );

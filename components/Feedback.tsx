@@ -135,7 +135,7 @@ function ConfirmDialog({ options, onClose }: { options: ConfirmOptions; onClose:
 
   return (
     <div className="fixed inset-0 grid place-items-center p-4" style={{ zIndex: 70 }}>
-      <div className="absolute inset-0" style={{ background: "rgba(43, 37, 69, 0.35)" }} onClick={() => onClose(false)} />
+      <div className="fade-in absolute inset-0" style={{ background: "rgba(43, 37, 69, 0.35)" }} onClick={() => onClose(false)} />
       <div
         role="alertdialog"
         aria-modal="true"

@@ -34,7 +34,7 @@ export default function UserMenu({ username }: { username: string }) {
         <ChevronDown size={16} />
       </button>
       {open && (
-        <div className="card absolute right-0 mt-2 w-52 overflow-hidden p-1.5">
+        <div className="card menu-in absolute right-0 mt-2 w-52 overflow-hidden p-1.5">
           <Link href="/onboarding" className="flex items-center gap-2 rounded-xl px-3 py-2 font-semibold hover:bg-grape-tint">
             <UserPen size={18} /> Change username
           </Link>

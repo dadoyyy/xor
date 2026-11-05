@@ -23,7 +23,8 @@ export default function StartQuizButton({ quizId, roomId, label }: { quizId: str
   return (
     <>
       <button className="btn btn-primary mt-5 w-full text-lg sm:w-auto" onClick={start} disabled={busy}>
-        {busy ? "Getting ready…" : label}
+        {busy && <span className="spinner" aria-hidden />}
+            {busy ? "Getting ready…" : label}
       </button>
       {error && <p className="mt-3 rounded-xl border-2 border-coral bg-coral-tint px-3 py-2 text-sm font-semibold">{error}</p>}
     </>

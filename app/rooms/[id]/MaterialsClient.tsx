@@ -284,13 +284,13 @@ export default function MaterialsClient({
 
       {notes && (
         <div
-          className="fixed inset-0 z-50 grid place-items-center bg-[#2b2545]/40 p-4"
+          className="fade-in fixed inset-0 z-50 grid place-items-center bg-[#2b2545]/40 p-4"
           role="dialog"
           aria-modal="true"
           aria-label={`Notes for ${notes.title}`}
           onClick={() => setNotes(null)}
         >
-          <div className="card flex max-h-[85dvh] w-full max-w-3xl flex-col" onClick={(e) => e.stopPropagation()}>
+          <div className="card pop flex max-h-[85dvh] w-full max-w-3xl flex-col" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between gap-3 border-b-2 border-line px-5 py-3">
               <p className="truncate font-display text-lg font-semibold">{notes.title}</p>
               <button className="btn btn-ghost btn-sm" onClick={() => setNotes(null)} aria-label="Close">

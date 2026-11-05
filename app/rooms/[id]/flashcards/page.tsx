@@ -3,6 +3,7 @@ import { requireRoom } from "@/lib/auth";
 import Mascot from "@/components/Mascot";
 import DeleteButton from "@/components/DeleteButton";
 import { Plus } from "lucide-react";
+import LinkSpinner from "@/components/LinkSpinner";
 
 export const metadata = { title: "Flashcards" };
 
@@ -39,11 +40,13 @@ export default async function Flashcards({ params }: { params: Promise<{ id: str
             const count = (d.cards as unknown as { count: number }[])?.[0]?.count ?? 0;
             const author = (d.profiles as unknown as { username: string | null })?.username ?? "someone";
             return (
-              <li key={d.id} className="card relative flex flex-col p-5">
+              <li key={d.id} className="card card-link relative flex flex-col p-5">
                 {/* stacked-cards look */}
                 <span aria-hidden className="absolute -right-2 -top-2 -z-10 h-full w-full rounded-[22px] border-2 border-sun bg-sun-tint" />
                 <Link href={`/rooms/${id}/flashcards/${d.id}`} className="flex-1">
-                  <p className="text-lg font-semibold leading-snug">{d.title}</p>
+                  <p className="flex items-center gap-2 text-lg font-semibold leading-snug">
+                    <span>{d.title}</span> <LinkSpinner className="size-4 text-grape" />
+                  </p>
                   <p className="mt-1 text-sm text-ink-soft">
                     {count} cards · by {author}
                   </p>

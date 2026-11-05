@@ -45,7 +45,8 @@ export default function ResetPassword() {
         </div>
         {error && <p className="rounded-xl border-2 border-coral bg-coral-tint px-3 py-2 text-sm font-semibold">{error}</p>}
         <button className="btn btn-primary" disabled={busy}>
-          {busy ? "Saving…" : "Save password"}
+          {busy && <span className="spinner" aria-hidden />}
+            {busy ? "Saving…" : "Save password"}
         </button>
       </form>
     </AuthShell>
