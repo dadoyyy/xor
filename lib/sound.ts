@@ -52,8 +52,15 @@ function audio(): AudioContext | null {
     if (!AC) return null;
     ctx = new AC();
     master = ctx.createGain();
-    master.gain.value = 0.32;
-    master.connect(ctx.destination);
+    master.gain.value = 0.8;
+    // a limiter so the louder level never crackles on phone speakers
+    const limiter = ctx.createDynamicsCompressor();
+    limiter.threshold.value = -10;
+    limiter.knee.value = 6;
+    limiter.ratio.value = 12;
+    limiter.attack.value = 0.002;
+    limiter.release.value = 0.15;
+    master.connect(limiter).connect(ctx.destination);
   }
   if (ctx.state === "suspended") ctx.resume().catch(() => {});
   return ctx;
@@ -122,7 +129,7 @@ const N = { C5: 523.25, D5: 587.33, E5: 659.25, G5: 783.99, A5: 880, B5: 987.77,
 
 const SOUNDS: Record<SoundName, () => void> = {
   // soft click for buttons
-  tap: () => tone({ f: 1800, to: 1200, d: 0.035, v: 0.12, type: "triangle" }),
+  tap: () => tone({ f: 1800, to: 1200, d: 0.04, v: 0.2, type: "triangle" }),
   // picking an answer: bubbly pop
   select: () => tone({ f: 520, to: 880, d: 0.09, v: 0.35, type: "sine" }),
   // flashcard flip
@@ -131,7 +138,7 @@ const SOUNDS: Record<SoundName, () => void> = {
     tone({ f: 660, to: 990, t: 0.03, d: 0.08, v: 0.12, type: "triangle" });
   },
   // moving to the next card/question
-  next: () => tone({ f: 990, to: 1320, d: 0.05, v: 0.14, type: "triangle" }),
+  next: () => tone({ f: 990, to: 1320, d: 0.06, v: 0.2, type: "triangle" }),
   // "I know this"
   know: () => {
     tone({ f: N.E5, d: 0.1, v: 0.3, type: "triangle" });
@@ -160,7 +167,7 @@ const SOUNDS: Record<SoundName, () => void> = {
     tone({ f: N.A5, t: 0.18, d: 0.1, v: 0.25, type: "square" });
   },
   // last seconds of a timer
-  tick: () => tone({ f: 1400, d: 0.03, v: 0.15, type: "square" }),
+  tick: () => tone({ f: 1400, d: 0.04, v: 0.2, type: "square" }),
   // deck finished
   deckDone: () => [N.C5, N.E5, N.G5, N.C6].forEach((f, k) => tone({ f, t: k * 0.08, d: 0.22, v: 0.25, type: "triangle" })),
   // quiz results
