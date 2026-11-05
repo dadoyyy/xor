@@ -14,25 +14,34 @@ export default async function Rooms({ searchParams }: { searchParams: Promise<{ 
   const { supabase, user, profile } = await requireProfile();
   const { missing } = await searchParams;
 
-  // Card designs need migration 002 (rooms.cover). Fall back gracefully if it hasn't been run yet.
-  type Membership = { role: string; joined_at: string; rooms: unknown };
+  // Card designs: rooms.cover (migration 002) is the starting design, room_members.cover (migration 004)
+  // is each person's own pick. Fall back gracefully if either hasn't been run yet.
+  type Membership = { role: string; joined_at: string; cover?: string | null; rooms: unknown };
   let coversEnabled = true;
   let memberships: Membership[] | null = null;
-  const withCover = await supabase
+  const mine = await supabase
     .from("room_members")
-    .select("role, joined_at, rooms(id, name, description, owner_id, cover)")
+    .select("role, joined_at, cover, rooms(id, name, description, owner_id, cover)")
     .eq("user_id", user.id)
     .order("joined_at", { ascending: false });
-  if (withCover.error) {
+  if (!mine.error) {
+    memberships = mine.data as Membership[] | null;
+  } else {
     coversEnabled = false;
-    const plain = await supabase
+    const withCover = await supabase
       .from("room_members")
-      .select("role, joined_at, rooms(id, name, description, owner_id)")
+      .select("role, joined_at, rooms(id, name, description, owner_id, cover)")
       .eq("user_id", user.id)
       .order("joined_at", { ascending: false });
-    memberships = plain.data as Membership[] | null;
-  } else {
-    memberships = withCover.data as Membership[] | null;
+    if (!withCover.error) memberships = withCover.data as Membership[] | null;
+    else {
+      const plain = await supabase
+        .from("room_members")
+        .select("role, joined_at, rooms(id, name, description, owner_id)")
+        .eq("user_id", user.id)
+        .order("joined_at", { ascending: false });
+      memberships = plain.data as Membership[] | null;
+    }
   }
 
   const roomIds = (memberships ?? []).map((m) => (m.rooms as unknown as { id: string }).id);
@@ -47,11 +56,11 @@ export default async function Rooms({ searchParams }: { searchParams: Promise<{ 
   const { data: upd, error: updErr } = await supabase.rpc("rooms_with_updates");
   if (!updErr && Array.isArray(upd)) for (const u of upd as { room_id: string; total: number }[]) newCounts.set(u.room_id, Number(u.total) || 0);
 
-  const rooms = (memberships ?? []).map((m) => ({
-    role: m.role as string,
-    cover: null as string | null,
-    ...(m.rooms as unknown as { id: string; name: string; description: string | null; cover?: string | null }),
-  }));
+  const rooms = (memberships ?? []).map((m) => {
+    const r = m.rooms as unknown as { id: string; name: string; description: string | null; owner_id: string; cover?: string | null };
+    // my own pick first, then the room's starting design
+    return { ...r, role: m.role as string, cover: m.cover ?? r.cover ?? null };
+  });
 
   return (
     <>

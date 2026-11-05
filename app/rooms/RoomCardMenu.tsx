@@ -6,11 +6,11 @@ import { createClient } from "@/lib/supabase/client";
 import { useFeedback } from "@/components/Feedback";
 import RoomCover from "@/components/RoomCover";
 import { COVERS, coverStyle, getCover } from "@/lib/covers";
-import { Check, LogOut, MoreHorizontal, Pencil, Trash2, X } from "lucide-react";
+import { Check, LogOut, MoreHorizontal, Palette, Pencil, Trash2, X } from "lucide-react";
 
 type Room = { id: string; name: string; description: string | null; cover: string | null; role: string };
 
-/** ⋯ button on a room card: Edit / Delete for owners, Leave for members. */
+/** ⋯ button on a room card. Everyone can change their own card design; owners can also edit/delete, members can leave. */
 export default function RoomCardMenu({ room, meId, coversEnabled }: { room: Room; meId: string; coversEnabled: boolean }) {
   const router = useRouter();
   const { confirm, toast } = useFeedback();
@@ -79,22 +79,20 @@ export default function RoomCardMenu({ room, meId, coversEnabled }: { room: Room
 
       {open && (
         <div role="menu" className="card menu-in absolute right-0 mt-2 w-48 p-1.5" style={{ zIndex: 6 }}>
+          <button
+            role="menuitem"
+            className={`${item} hover:bg-lilac`}
+            onClick={() => {
+              setOpen(false);
+              setEditing(true);
+            }}
+          >
+            {isOwner ? <Pencil size={16} /> : <Palette size={16} />} {isOwner ? "Edit room" : "Change design"}
+          </button>
           {isOwner ? (
-            <>
-              <button
-                role="menuitem"
-                className={`${item} hover:bg-lilac`}
-                onClick={() => {
-                  setOpen(false);
-                  setEditing(true);
-                }}
-              >
-                <Pencil size={16} /> Edit room
-              </button>
-              <button role="menuitem" className={`${item} text-coral hover:bg-coral-tint`} onClick={del}>
-                <Trash2 size={16} /> Delete room
-              </button>
-            </>
+            <button role="menuitem" className={`${item} text-coral hover:bg-coral-tint`} onClick={del}>
+              <Trash2 size={16} /> Delete room
+            </button>
           ) : (
             <button role="menuitem" className={`${item} text-coral hover:bg-coral-tint`} onClick={leave}>
               <LogOut size={16} /> Leave room
@@ -116,6 +114,8 @@ function EditRoomDialog({ room, coversEnabled, onClose }: { room: Room; coversEn
   const [desc, setDesc] = useState(room.description ?? "");
   const [cover, setCover] = useState(getCover(room.cover, room.id).id);
   const [busy, setBusy] = useState(false);
+  const isOwner = room.role === "owner";
+  const startCover = getCover(room.cover, room.id).id;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && !busy && onClose();
@@ -131,12 +131,24 @@ function EditRoomDialog({ room, coversEnabled, onClose }: { room: Room; coversEn
   async function save(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
-    const args: Record<string, string> = { p_room: room.id, p_name: name, p_description: desc };
-    if (coversEnabled) args.p_cover = cover;
-    const { error } = await createClient().rpc("update_room", args);
+    const supabase = createClient();
+    // name + description are shared (owner only); the design is just for me
+    if (isOwner && (name !== room.name || desc !== (room.description ?? ""))) {
+      const { error } = await supabase.rpc("update_room", { p_room: room.id, p_name: name, p_description: desc });
+      if (error) {
+        setBusy(false);
+        return toast({ kind: "error", title: "Couldn't save the room", body: error.message });
+      }
+    }
+    if (coversEnabled && cover !== startCover) {
+      const { error } = await supabase.rpc("set_my_cover", { p_room: room.id, p_cover: cover });
+      if (error) {
+        setBusy(false);
+        return toast({ kind: "error", title: "Couldn't save your design", body: error.message });
+      }
+    }
     setBusy(false);
-    if (error) return toast({ kind: "error", title: "Couldn't save the room", body: error.message });
-    toast({ title: "Room updated" });
+    toast({ title: isOwner ? "Room updated" : "Design saved", body: coversEnabled && cover !== startCover ? "Only you see this design." : undefined });
     onClose();
     router.refresh();
   }
@@ -153,7 +165,7 @@ function EditRoomDialog({ room, coversEnabled, onClose }: { room: Room; coversEn
       >
         <div className="flex items-center justify-between gap-3">
           <h2 id="edit-room-title" className="text-xl font-semibold">
-            Edit room
+            {isOwner ? "Edit room" : "Change design"}
           </h2>
           <button type="button" className="grid size-9 place-items-center rounded-full text-ink-soft hover:bg-lilac" onClick={onClose} aria-label="Close">
             <X size={18} />
@@ -168,23 +180,28 @@ function EditRoomDialog({ room, coversEnabled, onClose }: { room: Room; coversEn
               <p className="mt-3 truncate px-1 font-display text-lg font-semibold">{name || "Room name"}</p>
               <p className="truncate px-1 text-sm text-ink-soft">{desc || "No description"}</p>
             </div>
-            <div>
-              <label className="label" htmlFor="er-name">
-                Name
-              </label>
-              <input id="er-name" className="input" maxLength={60} value={name} onChange={(e) => setName(e.target.value)} required />
-            </div>
-            <div>
-              <label className="label" htmlFor="er-desc">
-                Description <span className="font-semibold text-ink-soft">(optional)</span>
-              </label>
-              <input id="er-desc" className="input" maxLength={280} value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="What's this room for?" />
-            </div>
+            {isOwner && (
+              <>
+                <div>
+                  <label className="label" htmlFor="er-name">
+                    Name
+                  </label>
+                  <input id="er-name" className="input" maxLength={60} value={name} onChange={(e) => setName(e.target.value)} required />
+                </div>
+                <div>
+                  <label className="label" htmlFor="er-desc">
+                    Description <span className="font-semibold text-ink-soft">(optional)</span>
+                  </label>
+                  <input id="er-desc" className="input" maxLength={280} value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="What's this room for?" />
+                </div>
+              </>
+            )}
           </div>
 
           {/* cover picker */}
           <fieldset>
             <legend className="label">Card design</legend>
+            <p className="-mt-1 mb-3 text-xs font-semibold text-ink-soft">Just for you. Everyone in the room picks their own.</p>
             {coversEnabled ? (
               <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 md:grid-cols-3" role="radiogroup" aria-label="Card design">
                 {COVERS.map((c) => {
@@ -221,7 +238,7 @@ function EditRoomDialog({ room, coversEnabled, onClose }: { room: Room; coversEn
               </div>
             ) : (
               <p className="rounded-2xl bg-sun-tint p-4 text-sm font-semibold">
-                Card designs need a quick database update. Run <span className="font-display">supabase/migrations/002_room_covers.sql</span> in
+                Card designs need a quick database update. Run <span className="font-display">supabase/migrations/004_personal_covers.sql</span> in
                 Supabase&apos;s SQL Editor, then refresh.
               </p>
             )}
@@ -232,9 +249,9 @@ function EditRoomDialog({ room, coversEnabled, onClose }: { room: Room; coversEn
           <button type="button" className="btn" onClick={onClose} disabled={busy}>
             Cancel
           </button>
-          <button className="btn btn-primary" disabled={busy || !name.trim()}>
+          <button className="btn btn-primary" disabled={busy || (isOwner && !name.trim())}>
             {busy && <span className="spinner" aria-hidden />}
-            {busy ? "Saving…" : "Save changes"}
+            {busy ? "Saving…" : isOwner ? "Save changes" : "Save design"}
           </button>
         </div>
       </form>
