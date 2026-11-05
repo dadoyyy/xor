@@ -66,13 +66,13 @@ export default function NewQuizForm({ roomId, materials }: { roomId: string; mat
     );
 
   return (
-    <form onSubmit={submit} className="grid gap-6">
+    <form onSubmit={submit} className="grid grid-cols-1 gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-2xl font-semibold">New quiz</h2>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="card grid content-start gap-6 p-5 sm:p-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="card grid min-w-0 grid-cols-1 content-start gap-6 p-5 sm:p-6">
           <MaterialPicker materials={materials} selected={selected} onChange={setSelected} />
           <div>
             <label className="label" htmlFor="count">
@@ -114,10 +114,10 @@ export default function NewQuizForm({ roomId, materials }: { roomId: string; mat
           <InstructionsField value={instructions} onChange={setInstructions} />
         </div>
 
-        <div className="card grid content-start gap-6 p-5 sm:p-6">
+        <div className="card grid min-w-0 grid-cols-1 content-start gap-6 p-5 sm:p-6">
           <fieldset>
             <legend className="label">Question types</legend>
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {QUESTION_TYPES.map((t) => {
                 const on = types.includes(t.id);
                 return (

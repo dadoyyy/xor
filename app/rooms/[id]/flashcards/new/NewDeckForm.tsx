@@ -51,14 +51,14 @@ export default function NewDeckForm({ roomId, materials }: { roomId: string; mat
     );
 
   return (
-    <form onSubmit={submit} className="grid gap-6">
+    <form onSubmit={submit} className="grid grid-cols-1 gap-6">
       <h2 className="text-2xl font-semibold">New flashcard deck</h2>
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="card grid content-start gap-6 p-5 sm:p-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="card grid min-w-0 grid-cols-1 content-start gap-6 p-5 sm:p-6">
           <MaterialPicker materials={materials} selected={selected} onChange={setSelected} />
           <InstructionsField value={instructions} onChange={setInstructions} />
         </div>
-        <div className="card grid content-start gap-6 p-5 sm:p-6">
+        <div className="card grid min-w-0 grid-cols-1 content-start gap-6 p-5 sm:p-6">
           <div>
             <label className="label" htmlFor="count">
               Number of cards: <span className="text-grape">{count}</span>

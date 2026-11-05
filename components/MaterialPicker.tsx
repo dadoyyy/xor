@@ -18,7 +18,7 @@ export default function MaterialPicker({
   return (
     <fieldset>
       <legend className="label">Study materials</legend>
-      <ul className="grid gap-2">
+      <ul className="grid grid-cols-1 gap-2">
         {materials.map((m) => {
           const on = selected.includes(m.id);
           return (
