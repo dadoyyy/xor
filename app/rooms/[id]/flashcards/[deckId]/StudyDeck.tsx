@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { play } from "@/lib/sound";
 import Mascot from "@/components/Mascot";
 import SwipeCard from "@/components/SwipeCard";
+import { useFeedback } from "@/components/Feedback";
 import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, RotateCcw, Shuffle } from "lucide-react";
 
 type Card = { id: string; front: string; back: string };
@@ -13,6 +14,8 @@ export default function StudyDeck({ cards: initial }: { cards: Card[] }) {
   const [flipped, setFlipped] = useState(false);
   const [known, setKnown] = useState<Set<string>>(new Set());
   const [onlyLearning, setOnlyLearning] = useState(false);
+  const [round, setRound] = useState(0); // bumps on restart so the card resets even on card 1
+  const { toast } = useFeedback();
 
   const deck = useMemo(() => (onlyLearning ? order.filter((c) => !known.has(c.id)) : order), [order, known, onlyLearning]);
   const card = deck[i];
@@ -70,10 +73,23 @@ export default function StudyDeck({ cards: initial }: { cards: Card[] }) {
     setFlipped(false);
   }
 
-  function restart(learningOnly: boolean) {
-    setOnlyLearning(learningOnly);
+  /** Full restart: back to card 1, original order, and the Know / Learning counts cleared. */
+  function restart() {
+    setOrder(initial);
+    setKnown(new Set());
+    setOnlyLearning(false);
     setI(0);
     setFlipped(false);
+    setRound((r) => r + 1);
+    toast({ kind: "info", title: "Deck restarted", body: "Counts cleared. Back to card 1." });
+  }
+
+  /** Go again with only the cards still being learned (keeps what you already know). */
+  function studyLearning() {
+    setOnlyLearning(true);
+    setI(0);
+    setFlipped(false);
+    setRound((r) => r + 1);
   }
 
   // little celebration when the deck is finished
@@ -114,7 +130,7 @@ export default function StudyDeck({ cards: initial }: { cards: Card[] }) {
         <button className="btn btn-sm flex-1" onClick={shuffle}>
           <Shuffle size={16} /> Shuffle
         </button>
-        <button className="btn btn-sm flex-1" onClick={() => restart(false)}>
+        <button className="btn btn-sm flex-1" onClick={restart}>
           <RotateCcw size={16} /> Restart
         </button>
       </div>
@@ -134,18 +150,18 @@ export default function StudyDeck({ cards: initial }: { cards: Card[] }) {
             </p>
             <div className="mt-5 flex flex-wrap justify-center gap-3">
               {learningLeft > 0 && (
-                <button className="btn btn-primary" onClick={() => restart(true)}>
+                <button className="btn btn-primary" onClick={studyLearning}>
                   Study the {learningLeft} I&apos;m learning
                 </button>
               )}
-              <button className="btn" onClick={() => restart(false)}>
+              <button className="btn" onClick={restart}>
                 <RotateCcw size={16} /> Start over
               </button>
             </div>
           </div>
         ) : (
           <>
-            <SwipeCard resetKey={`${card.id}-${i}`} onSwipe={(dir) => mark(dir === "right")} leftLabel="Still learning" rightLabel="I know this">
+            <SwipeCard resetKey={`${card.id}-${i}-${round}`} onSwipe={(dir) => mark(dir === "right")} leftLabel="Still learning" rightLabel="I know this">
             <button
               className="flip block h-80 w-full text-left sm:h-96 lg:h-[28rem]"
               data-sfx="none"
