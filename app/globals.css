@@ -1,0 +1,215 @@
+@import "tailwindcss";
+
+/* Tell Tailwind exactly where class names live (don't rely on auto-detection). */
+@source "../app";
+@source "../components";
+@source "../lib";
+
+/* xor design tokens — always light.
+   White base, purple + yellow accents. Green/red only mean right/wrong. */
+:root {
+  color-scheme: light;
+  --sky: #ffffff;          /* page background */
+  --paper: #ffffff;        /* card surface */
+  --lilac: #f6f2ff;        /* soft section background */
+  --ink: #2b2545;          /* text */
+  --ink-soft: #6e6888;     /* secondary text */
+  --line: #e6dff7;         /* borders */
+  --grape: #7c3aed;        /* accent 1 */
+  --grape-deep: #5b21b6;   /* purple button edge */
+  --grape-tint: #efe7ff;
+  --sun: #ffcc33;          /* accent 2 */
+  --sun-deep: #e0a800;     /* yellow button edge */
+  --sun-tint: #fff5d1;
+  --coral: #e5484d;        /* wrong / danger */
+  --coral-tint: #fdeced;
+  --mint: #16a34a;         /* right / success */
+  --mint-tint: #e7f7ec;
+  --shadow: rgba(91, 33, 182, 0.08);
+}
+
+@theme inline {
+  --color-sky: var(--sky);
+  --color-paper: var(--paper);
+  --color-lilac: var(--lilac);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-grape: var(--grape);
+  --color-grape-deep: var(--grape-deep);
+  --color-grape-tint: var(--grape-tint);
+  --color-sun: var(--sun);
+  --color-sun-deep: var(--sun-deep);
+  --color-sun-tint: var(--sun-tint);
+  --color-coral: var(--coral);
+  --color-coral-tint: var(--coral-tint);
+  --color-mint: var(--mint);
+  --color-mint-tint: var(--mint-tint);
+  --font-display: "Fredoka Variable", ui-rounded, system-ui, sans-serif;
+  --font-sans: "Nunito Variable", ui-rounded, system-ui, sans-serif;
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+  background: var(--sky);
+}
+
+body {
+  background: var(--sky);
+  color: var(--ink);
+  font-family: "Nunito Variable", ui-rounded, system-ui, sans-serif;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, .font-display {
+  font-family: "Fredoka Variable", ui-rounded, system-ui, sans-serif;
+  letter-spacing: -0.01em;
+}
+
+:focus-visible {
+  outline: 3px solid var(--grape);
+  outline-offset: 3px;
+  border-radius: 10px;
+}
+
+@layer components {
+  /* soft white card with a gentle purple lift */
+  .card {
+    background: var(--paper);
+    border: 2px solid var(--line);
+    border-radius: 22px;
+    box-shadow: 0 6px 0 var(--line), 0 14px 30px -12px var(--shadow);
+  }
+  .card-flat {
+    background: var(--paper);
+    border: 2px solid var(--line);
+    border-radius: 16px;
+  }
+
+  /* "candy" buttons: colored face + darker bottom edge */
+  .btn {
+    --edge: var(--line);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: "Fredoka Variable", ui-rounded, system-ui, sans-serif;
+    font-weight: 600;
+    border: 2px solid var(--line);
+    border-radius: 999px;
+    padding: 0.6rem 1.15rem;
+    box-shadow: 0 4px 0 var(--edge);
+    transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.15s ease;
+    background: var(--paper);
+    color: var(--ink);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn:hover:not(:disabled) { background-color: var(--lilac); }
+  .btn:active:not(:disabled) {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 var(--edge);
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .btn-primary { --edge: var(--grape-deep); background: var(--grape); border-color: var(--grape); color: #fff; }
+  .btn-primary:hover:not(:disabled) { background: #6d28d9; }
+  .btn-sun { --edge: var(--sun-deep); background: var(--sun); border-color: var(--sun); color: var(--ink); }
+  .btn-sun:hover:not(:disabled) { background: #ffc21a; }
+  .btn-danger { --edge: #b42a2f; background: var(--coral); border-color: var(--coral); color: #fff; }
+  .btn-danger:hover:not(:disabled) { background: #d63c41; }
+  .btn-ghost { box-shadow: none; border-color: transparent; background: transparent; }
+  .btn-ghost:hover:not(:disabled) { background: var(--grape-tint); }
+  .btn-ghost:active:not(:disabled) { transform: none; box-shadow: none; }
+  .btn-sm { padding: 0.35rem 0.85rem; font-size: 0.875rem; box-shadow: 0 3px 0 var(--edge); }
+
+  .input {
+    width: 100%;
+    background: var(--paper);
+    color: var(--ink);
+    border: 2px solid var(--line);
+    border-radius: 14px;
+    padding: 0.65rem 0.9rem;
+    font-size: 1rem;
+  }
+  .input::placeholder { color: var(--ink-soft); opacity: 0.7; }
+  .input:focus { outline: 3px solid var(--grape-tint); border-color: var(--grape); }
+
+  .label {
+    display: block;
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    border: 2px solid var(--line);
+    border-radius: 999px;
+    padding: 0.15rem 0.65rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    background: var(--paper);
+    white-space: nowrap;
+  }
+  .chip-on { background: var(--grape); border-color: var(--grape); color: #fff; }
+
+  .key-text {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+  }
+
+  /* full-width page gutters */
+  /* ONE gutter for every page, top bar and sidebar: 16 / 24 / 32px */
+  .page-x { padding-left: 1rem; padding-right: 1rem; }
+  @media (min-width: 640px) { .page-x { padding-left: 1.5rem; padding-right: 1.5rem; } }
+  @media (min-width: 1024px) { .page-x { padding-left: 2rem; padding-right: 2rem; } }
+}
+
+/* quiz stage: soft lavender with a faint repeating sparkle pattern */
+.quiz-stage {
+  background-color: var(--lilac);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cpath d='M14 8l1.6 4.4L20 14l-4.4 1.6L14 20l-1.6-4.4L8 14l4.4-1.6z' fill='%23e3d8ff'/%3E%3Ccircle cx='42' cy='40' r='2.2' fill='%23e3d8ff'/%3E%3C/svg%3E");
+}
+
+/* flashcard flip */
+.flip { perspective: 1400px; }
+.flip-inner {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.45s cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+.flip-inner.flipped { transform: rotateY(180deg); }
+.flip-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.flip-back { transform: rotateY(180deg); }
+
+/* mascot bob — used on the hero and loading states */
+@keyframes bob {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-8px) rotate(3deg); }
+}
+.bob { animation: bob 3.2s ease-in-out infinite; }
+
+@keyframes pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  70% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.pop { animation: pop 0.45s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .bob, .pop { animation: none; }
+  .flip-inner { transition: none; }
+  .btn { transition: none; }
+}
