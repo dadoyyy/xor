@@ -1,10 +1,10 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import Mascot from "@/components/Mascot";
-import Markdown from "@/components/Markdown";
+import NotesDialog from "@/components/NotesDialog";
 import { useFeedback } from "@/components/Feedback";
 import { NewTag } from "@/components/Badges";
 import { AlertTriangle, BookOpen, CheckCircle2, ExternalLink, FileUp, Loader2, RotateCw, Trash2, X } from "lucide-react";
@@ -50,7 +50,7 @@ export default function MaterialsClient({
   const [uploading, setUploading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
-  const [notes, setNotes] = useState<{ title: string; content: string } | null>(null);
+  const [notes, setNotes] = useState<{ title: string; content: string | null } | null>(null);
   const { confirm, toast } = useFeedback();
 
   // Poll while something is being read by the AI
@@ -138,10 +138,16 @@ export default function MaterialsClient({
   }
 
   async function viewNotes(m: MaterialRow) {
+    setNotes({ title: m.title, content: null }); // open right away with a skeleton
     const { data, error } = await supabase.from("materials").select("content").eq("id", m.id).single();
-    if (error) return setError(error.message);
-    setNotes({ title: m.title, content: data.content ?? "" });
+    if (error) {
+      setNotes(null);
+      return setError(error.message);
+    }
+    setNotes((n) => (n && n.title === m.title ? { title: m.title, content: data.content ?? "" } : n));
   }
+
+  const closeNotes = useCallback(() => setNotes(null), []);
 
   const readyCount = materials.filter((m) => m.status === "ready").length;
 
@@ -286,28 +292,7 @@ export default function MaterialsClient({
         </section>
       </div>
 
-      {notes && (
-        <div
-          className="fade-in fixed inset-0 z-50 grid place-items-center bg-[#2b2545]/40 p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-label={`Notes for ${notes.title}`}
-          onClick={() => setNotes(null)}
-        >
-          <div className="card pop flex max-h-[85dvh] w-full max-w-3xl flex-col" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between gap-3 border-b-2 border-line px-5 py-3">
-              <p className="truncate font-display text-lg font-semibold">{notes.title}</p>
-              <button className="btn btn-ghost btn-sm" onClick={() => setNotes(null)} aria-label="Close">
-                <X size={18} />
-              </button>
-            </div>
-            <div className="overflow-y-auto px-5 py-4">
-              <p className="mb-3 text-xs text-ink-soft">These are the notes the AI read from your PDF. Quizzes and flashcards come from these.</p>
-              <Markdown text={notes.content} />
-            </div>
-          </div>
-        </div>
-      )}
+      {notes && <NotesDialog title={notes.title} content={notes.content} onClose={closeNotes} />}
     </div>
   );
 }
