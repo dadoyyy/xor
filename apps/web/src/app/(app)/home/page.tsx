@@ -6,10 +6,54 @@ import { getStreakSummary, getUserActivityHeatmap } from "@/services/activitySer
 import { listUserCalendarEvents } from "@/services/calendarService";
 import type { CalendarEvent } from "@/types/subject";
 
-export const metadata = { title: "Home — xor" };
+export const metadata = { title: "xor" };
 
-export default async function HomePage() {
+function computeServerScene(timezone?: string | null): {
+  scene: "morning" | "afternoon" | "evening";
+  greeting: string;
+} {
+  let hour: number;
+  try {
+    if (timezone) {
+      const timeStr = new Intl.DateTimeFormat("en-US", {
+        timeZone: timezone,
+        hour: "numeric",
+        hour12: false,
+      }).format(new Date());
+      hour = parseInt(timeStr, 10);
+    } else {
+      hour = new Date().getHours();
+    }
+  } catch {
+    hour = new Date().getHours();
+  }
+
+  if (hour >= 5 && hour < 12) {
+    return { scene: "morning", greeting: "Good morning" };
+  }
+  if (hour >= 12 && hour < 18) {
+    return { scene: "afternoon", greeting: "Good afternoon" };
+  }
+  return { scene: "evening", greeting: "Good evening" };
+}
+
+export default async function HomePage(props: {
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const { supabase, user, profile } = await requireProfile();
+
+  const isDev = process.env.NODE_ENV !== "production";
+  const resolvedParams = props.searchParams ? await props.searchParams : undefined;
+  const rawScene = isDev ? resolvedParams?.scene : null;
+  const sceneOverride =
+    rawScene === "morning" ||
+    rawScene === "afternoon" ||
+    rawScene === "evening" ||
+    rawScene === "night"
+      ? (rawScene === "night" ? "evening" : (rawScene as "morning" | "afternoon" | "evening"))
+      : null;
+
+  const serverScene = computeServerScene(profile?.timezone);
 
   // Compute past 7 dates for week activity
   const now = new Date();
@@ -181,6 +225,17 @@ export default async function HomePage() {
         thisWeek={thisWeek}
         upcomingEvents={upcomingEvents}
         heatmap={heatmapRes ?? []}
+        initialScene={sceneOverride ?? serverScene.scene}
+        initialGreeting={
+          sceneOverride === "morning"
+            ? "Good morning"
+            : sceneOverride === "afternoon"
+            ? "Good afternoon"
+            : sceneOverride === "evening" || sceneOverride === "night"
+            ? "Good evening"
+            : serverScene.greeting
+        }
+        sceneOverride={sceneOverride}
       />
     </div>
   );

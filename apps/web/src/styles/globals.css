@@ -11,22 +11,72 @@
 @source "../constants";
 
 /* xor design tokens — modern dashboard system.
-   Deep purple frame (#5223BD), white sheet (radius 28px), 20px borderless flat cards. */
+   Soft lilac-to-cream frame, white sheet (radius 28px), 20px borderless flat cards. */
 :root {
   color-scheme: light;
-  --shell-bg: #5223BD;             /* deep purple frame (7.2:1 contrast against white) */
-  --shell-fg: #FFFFFF;             /* frame text */
-  --shell-muted: rgba(255, 255, 255, 0.7);
-  --shell-surface: rgba(255, 255, 255, 0.12);
-  --shell-surface-hover: rgba(255, 255, 255, 0.18);
+  --shell-stop-1: #D3C4FF;
+  --shell-stop-2: #E6DDFF;
+  --shell-stop-3: #FFE9A8;
+  --shell-bg: linear-gradient(135deg, var(--shell-stop-1) 0%, var(--shell-stop-2) 45%, var(--shell-stop-3) 100%);
+  --shell-bg-fallback: #EDE6FF;
+
+  /* Alternates that can be switched by changing one variable: */
+  --shell-alt-flat: #E9E1FF;
+  --shell-alt-near-white: #F4F0FF;
+  --shell-alt-sheet-border: 1px solid #E4D9FF;
+
+  --shell-fg: #2B1B5A;             /* ink */
+  --shell-muted: #5B5480;          /* secondary frame text */
+  --shell-surface: rgba(255, 255, 255, 0.65); /* search field and pills on the frame */
+  --shell-surface-hover: rgba(255, 255, 255, 0.85);
+  --shell-accent: #6D3BE8;         /* active purple accent */
+  --sheet-border: rgba(109, 59, 232, 0.22); /* 1px solid sheet definition */
+  --sheet-ring: rgba(255, 255, 255, 0.55);   /* 6px outer zero-blur ring */
+  --sheet-edge: 1px solid var(--sheet-border);
   --sheet-bg: #FFFFFF;             /* inner content sheet */
   --sheet-radius: 28px;
   --card-radius: 20px;
+  --radius-pill: 9999px;
+  --radius-button: var(--radius-pill);
+
+  /* Floating navigation capsule tokens */
+  --nav-capsule-bg: rgba(255, 255, 255, 0.85);
+  --nav-capsule-bg-solid: #FFFFFF;
+  --nav-capsule-border: var(--sheet-border);
+  --nav-capsule-shadow: 0 6px 18px rgba(90, 43, 196, 0.10);
+  --nav-active-bg: #6D3BE8;
+  --nav-active-bg-soft: #EFE9FF;
+  --nav-active-fg: #FFFFFF;
+  --nav-active-fg-soft: #5A2BC4;
+  --nav-inactive: #5B5480;
+  --nav-item-radius: 22px;
+
+  --card-border: #E4D9FF;          /* subtle 1px card border */
   --card-neutral: #F7F5FF;         /* neutral borderless card */
   --card-lilac: #EFE9FF;           /* lilac-tinted card */
   --card-yellow: #FFF1C2;          /* yellow-tinted card */
   --card-hero-from: #DCD0FF;       /* hero gradient start */
   --card-hero-to: #FFF6E3;         /* hero gradient end */
+
+  /* Cream-gold card family */
+  --card-cream-surface: #FFFBF0;   /* subtle warm cream surface */
+  --card-cream-border: #F2D675;    /* 1px gold card border */
+  --card-cream-divider: #F6E7B0;   /* soft gold inner dividers */
+  --card-cream-accent: #F6C531;    /* solid yellow primary button */
+  --card-cream-accent-hover: #E8B51F; /* yellow hover */
+  --card-cream-accent-soft: #FFF1C2; /* icon tile & corgi halo */
+  --card-cream-text-muted: #66573A; /* warm brown-gray secondary text (6.79:1 contrast) */
+  --link-on-cream: #5A2BC4;        /* high-contrast purple link (7.88:1 contrast) */
+
+  /* Mascot Backdrop System Tokens (Surface-Aware) */
+  --mascot-bg-on-lilac: #FED770;      /* warm soft yellow (1.17:1 on #EFE9FF, 10.78:1 on corgi) */
+  --mascot-bg-on-neutral: #FED770;    /* warm soft yellow (1.28:1 on #F7F5FF, 10.78:1 on corgi) */
+  --mascot-bg-on-cream: #E4D9FF;      /* soft lilac (1.30:1 on #FFFBF0, 11.13:1 on corgi) */
+  --mascot-bg-on-yellow: #E4D9FF;     /* soft lilac (1.19:1 on #FFF1C2, 11.13:1 on corgi) */
+  --mascot-bg-on-white: #FED770;      /* warm soft yellow (1.38:1 on #FFFFFF, 10.78:1 on corgi) */
+  --mascot-bg-on-white-alt: #EFE9FF;  /* soft lilac on white (1.18:1 on #FFFFFF, 12.63:1 on corgi) */
+  --mascot-bg-on-gradient: rgba(255, 255, 255, 0.7); /* translucent white on hero gradients */
+  --current-mascot-bg: var(--mascot-bg-on-white);
 
   --sky: #ffffff;                  /* page background */
   --paper: #ffffff;                /* card surface */
@@ -53,7 +103,21 @@
   --color-shell-fg: var(--shell-fg);
   --color-shell-muted: var(--shell-muted);
   --color-shell-surface: var(--shell-surface);
+  --color-shell-accent: var(--shell-accent);
   --color-sheet-bg: var(--sheet-bg);
+  --color-sheet-border: var(--sheet-border);
+  --color-sheet-ring: var(--sheet-ring);
+  --color-nav-capsule-bg: var(--nav-capsule-bg);
+  --color-nav-capsule-border: var(--nav-capsule-border);
+  --color-card-border: var(--card-border);
+  --color-card-cream-surface: var(--card-cream-surface);
+  --color-card-cream-border: var(--card-cream-border);
+  --color-card-cream-divider: var(--card-cream-divider);
+  --color-card-cream-accent: var(--card-cream-accent);
+  --color-card-cream-accent-hover: var(--card-cream-accent-hover);
+  --color-card-cream-accent-soft: var(--card-cream-accent-soft);
+  --color-card-cream-text-muted: var(--card-cream-text-muted);
+  --color-link-on-cream: var(--link-on-cream);
   --color-card-neutral: var(--card-neutral);
   --color-card-lilac: var(--card-lilac);
   --color-card-yellow: var(--card-yellow);
@@ -71,6 +135,8 @@
   --color-coral-tint: var(--coral-tint);
   --color-mint: var(--mint);
   --color-mint-tint: var(--mint-tint);
+  --radius-pill: var(--radius-pill);
+  --radius-button: var(--radius-button);
   --font-display: "Fredoka Variable", ui-rounded, system-ui, sans-serif;
   --font-sans: "Nunito Variable", ui-rounded, system-ui, sans-serif;
 }
@@ -139,8 +205,86 @@ h1, h2, h3, .font-display {
     border-radius: 20px;
     box-shadow: none;
   }
+  .card-outlined-tint {
+    border: 1px solid var(--card-border);
+    border-radius: var(--card-radius, 20px);
+    box-shadow: none;
+  }
+  .card-cream-gold {
+    background: var(--card-cream-surface);
+    border: 1px solid var(--card-cream-border);
+    border-radius: var(--card-radius, 20px);
+    box-shadow: none;
+  }
+  .nav-capsule {
+    background-color: var(--nav-capsule-bg-solid, #FFFFFF);
+    background-color: var(--nav-capsule-bg);
+    border: 1px solid var(--nav-capsule-border);
+    box-shadow: var(--nav-capsule-shadow);
+    border-radius: var(--radius-pill);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
 
-  /* Flat buttons: solid fill, radius 10px, no box-shadow, hover darker, active 0.98 */
+  .nav-capsule-desktop {
+    --nav-indicator-size: 64px;
+    --nav-indicator-step: 72px; /* 64px button + 8px gap */
+    --nav-indicator-top: 12px;
+    --nav-indicator-left: 8px;
+  }
+
+  /* Compact navigation capsule when viewport height is 720px or less */
+  @media (min-width: 768px) and (max-height: 720px) {
+    .nav-capsule-desktop {
+      padding-top: 8px !important;
+      padding-bottom: 8px !important;
+      gap: 6px !important;
+      --nav-indicator-size: 54px;
+      --nav-indicator-step: 60px; /* 54px + 6px gap */
+      --nav-indicator-top: 8px;
+      --nav-indicator-left: 13px;
+    }
+    .nav-item-desktop {
+      width: 54px !important;
+      height: 54px !important;
+      border-radius: 9999px !important;
+    }
+  }
+
+  /* Surface-Aware Mascot Backdrop Mapping */
+  [data-surface="lilac"] { --current-mascot-bg: var(--mascot-bg-on-lilac); }
+  [data-surface="neutral"] { --current-mascot-bg: var(--mascot-bg-on-neutral); }
+  [data-surface="cream"] { --current-mascot-bg: var(--mascot-bg-on-cream); }
+  [data-surface="yellow"] { --current-mascot-bg: var(--mascot-bg-on-yellow); }
+  [data-surface="white"] { --current-mascot-bg: var(--mascot-bg-on-white); }
+  [data-surface="white-alt"] { --current-mascot-bg: var(--mascot-bg-on-white-alt); }
+  [data-surface="gradient"] { --current-mascot-bg: var(--mascot-bg-on-gradient); }
+
+  /* Flat buttons & interactive controls: tactile feedback, smooth micro-interactions */
+  button,
+  .btn,
+  [role="button"],
+  .tab-pill {
+    transition:
+      transform 0.14s cubic-bezier(0.34, 1.56, 0.64, 1),
+      background-color 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease,
+      box-shadow 0.15s ease,
+      opacity 0.15s ease;
+    will-change: transform;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+  }
+  button:active:not(:disabled),
+  .btn:active:not(:disabled),
+  [role="button"]:active:not([aria-disabled="true"]),
+  .tab-pill:active {
+    transform: scale(0.98);
+    transition-duration: 0.08s;
+  }
+
   .btn {
     display: inline-flex;
     align-items: center;
@@ -149,37 +293,36 @@ h1, h2, h3, .font-display {
     font-family: "Fredoka Variable", ui-rounded, system-ui, sans-serif;
     font-weight: 600;
     border: 1px solid transparent;
-    border-radius: 10px;
-    padding: 0.6rem 1.25rem;
+    border-radius: var(--radius-button);
     box-shadow: none;
     background: transparent;
-    transition:
-      transform 0.1s ease,
-      background-color 0.15s ease,
-      border-color 0.15s ease,
-      color 0.15s ease,
-      opacity 0.15s ease;
-    -webkit-user-select: none;
-    user-select: none;
-    touch-action: manipulation;
     color: var(--ink);
     cursor: pointer;
     white-space: nowrap;
+    height: 40px;
+    padding: 0 18px;
+    font-size: 0.9375rem;
+    line-height: 1;
   }
   .btn:hover:not(:disabled) {
     background-color: var(--lilac);
   }
-  .btn:active:not(:disabled) {
-    transform: scale(0.98);
-  }
-  .btn:focus-visible {
+  .btn:focus-visible,
+  button:focus-visible,
+  [role="button"]:focus-visible {
     outline: 2px solid var(--grape);
     outline-offset: 2px;
-    border-radius: 10px;
+    border-radius: var(--radius-button);
   }
-  .btn:disabled {
-    opacity: 0.5;
+  .btn:disabled,
+  .btn[aria-disabled="true"],
+  button:disabled {
     cursor: not-allowed;
+    background-color: #EDE8F5;
+    border-color: transparent;
+    color: #655887;
+    opacity: 0.85;
+    transform: none !important;
   }
 
   /* Flat Button Variants */
@@ -202,6 +345,11 @@ h1, h2, h3, .font-display {
     background: var(--lilac);
     border-color: var(--line);
   }
+  .btn-secondary:disabled {
+    background: transparent;
+    border-color: #D9D2E9;
+    color: #655887;
+  }
 
   .btn-accent, .btn-sun {
     background: var(--sun);
@@ -210,6 +358,7 @@ h1, h2, h3, .font-display {
   }
   .btn-accent:hover:not(:disabled), .btn-sun:hover:not(:disabled) {
     background: #f5be18;
+    color: var(--ink);
   }
 
   .btn-ghost {
@@ -225,31 +374,49 @@ h1, h2, h3, .font-display {
     transform: scale(0.98);
   }
 
-  .btn-danger {
-    background: var(--coral);
+  .btn-danger, .btn-coral {
+    background: #dc2626;
     border-color: transparent;
     color: #ffffff;
   }
-  .btn-danger:hover:not(:disabled) {
-    background: #d63c41;
+  .btn-danger:hover:not(:disabled), .btn-coral:hover:not(:disabled) {
+    background: #b91c1c;
   }
 
   .btn-sm {
-    padding: 0.4rem 1rem;
+    height: 32px;
+    padding: 0 14px;
     font-size: 0.875rem;
-    border-radius: 10px;
+    border-radius: var(--radius-button);
   }
 
   .btn-xs {
-    padding: 0.25rem 0.75rem;
+    height: 28px;
+    padding: 0 10px;
     font-size: 0.75rem;
-    border-radius: 10px;
+    border-radius: var(--radius-button);
+  }
+
+  .btn-md {
+    height: 40px;
+    padding: 0 18px;
+    font-size: 0.9375rem;
+    border-radius: var(--radius-button);
   }
 
   .btn-lg {
-    padding: 0.75rem 1.75rem;
+    height: 48px;
+    padding: 0 24px;
     font-size: 1rem;
-    border-radius: 10px;
+    border-radius: var(--radius-button);
+  }
+
+  @media (pointer: coarse) {
+    .btn,
+    button.btn,
+    a.btn {
+      min-height: 44px;
+    }
   }
 
   /* Flat Inputs */
@@ -303,11 +470,12 @@ h1, h2, h3, .font-display {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 9999px;
-    padding: 0.45rem 1rem;
+    border-radius: var(--radius-button);
+    padding: 0 14px;
+    height: 32px;
     font-size: 0.875rem;
     font-weight: 600;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
     cursor: pointer;
   }
   .tab-pill-active {
@@ -408,11 +576,14 @@ h1, h2, h3, .font-display {
 /* ---- transitions that make the app feel instant ---- */
 
 /* every page and tab fades up softly when it appears */
-@keyframes page-in {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: none; }
+@keyframes pageEnter {
+  0% { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
-.page-in { animation: page-in 0.2s cubic-bezier(0.3, 0.7, 0.4, 1) both; }
+.page-in, .page-enter {
+  animation: pageEnter 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity, transform;
+}
 
 /* dimmed backdrops behind dialogs and drawers */
 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
@@ -472,10 +643,10 @@ h1, h2, h3, .font-display {
 .input, .chip, .card-flat { transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease; }
 
 @media (prefers-reduced-motion: reduce) {
-  .bob, .corgi-float, .corgi-hop, .corgi-dot-bounce, .corgi-shimmer-bar, .pop, .page-in, .fade-in, .menu-in { animation: none; }
+  .bob, .corgi-float, .corgi-hop, .corgi-dot-bounce, .corgi-shimmer-bar, .pop, .page-in, .page-enter, .fade-in, .menu-in { animation: none; }
   .skeleton { animation-duration: 3s; }
-  .flip-inner, .btn, .card-link, .corgi-layer { transition: none; }
-  .btn:hover:not(:disabled), .card-link:hover { transform: none; }
+  .flip-inner, .btn, button, [role="button"], .card-link, .corgi-layer, .nav-capsule, .nav-capsule * { transition: none !important; }
+  .btn:hover:not(:disabled), button:hover:not(:disabled), .card-link:hover, .nav-capsule *:hover { transform: none !important; }
 }
 
 /* ---------- AI notes (Markdown) ---------- */
@@ -515,4 +686,32 @@ h1, h2, h3, .font-display {
   100% { width: 92%; }
 }
 .nav-bar-grow { animation: nav-bar-grow 8s cubic-bezier(0.1, 0.7, 0.3, 1) forwards; }
+
+/* Subtle noise overlay to eliminate banding on wide soft gradients */
+.shell-dither {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.025'/%3E%3C/svg%3E");
+}
+
+/* Floating animation for banner corgi */
+@keyframes corgi-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+.corgi-float {
+  animation: corgi-float 4s ease-in-out infinite;
+}
+
+/* Home Banner composition: hide book stack when banner container is narrower than 800px to maintain >= 24px clearance */
+.cq-books {
+  display: none;
+}
+@container (min-width: 800px) {
+  .cq-books {
+    display: inline;
+  }
+}
 
