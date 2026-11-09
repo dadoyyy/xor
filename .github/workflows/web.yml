@@ -1,0 +1,24 @@
+name: Web CI
+
+on:
+  push:
+    paths:
+      - "apps/web/**"
+      - "packages/**"
+  pull_request:
+    paths:
+      - "apps/web/**"
+      - "packages/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm --workspace @xor/web run typecheck
+      - run: npm --workspace @xor/web run build
+

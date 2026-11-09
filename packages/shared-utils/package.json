@@ -1,0 +1,15 @@
+{
+  "name": "@xor/shared-utils",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types test/textImportParser.test.ts"
+  },
+  "dependencies": {
+    "@xor/shared-types": "0.1.0"
+  }
+}
+

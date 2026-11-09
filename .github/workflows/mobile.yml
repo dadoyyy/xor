@@ -1,0 +1,23 @@
+name: Mobile CI
+
+on:
+  push:
+    paths:
+      - "apps/mobile/**"
+      - "packages/**"
+  pull_request:
+    paths:
+      - "apps/mobile/**"
+      - "packages/**"
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm --workspace @xor/mobile run typecheck
+

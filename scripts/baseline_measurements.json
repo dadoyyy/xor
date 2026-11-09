@@ -1,0 +1,87 @@
+{
+  "mainNav": [
+    {
+      "item": "/subjects",
+      "firstIndicator": 285,
+      "firstContent": 1621,
+      "secondIndicator": 52,
+      "secondContent": 99,
+      "longTasks1": 202,
+      "longTasks2": 0
+    },
+    {
+      "item": "/calendar",
+      "firstIndicator": 44,
+      "firstContent": 1886,
+      "secondIndicator": 43,
+      "secondContent": 49,
+      "longTasks1": 0,
+      "longTasks2": 0
+    },
+    {
+      "item": "/progress",
+      "firstIndicator": 75,
+      "firstContent": 79,
+      "secondIndicator": 84,
+      "secondContent": 88,
+      "longTasks1": 0,
+      "longTasks2": 0
+    },
+    {
+      "item": "/home",
+      "firstIndicator": 84,
+      "firstContent": 91,
+      "secondIndicator": 61,
+      "secondContent": 882,
+      "longTasks1": 0,
+      "longTasks2": 0
+    }
+  ],
+  "subjectTabs": [
+    {
+      "tab": "FLASHCARDS",
+      "firstIndicator": 71,
+      "firstContent": 2937,
+      "secondIndicator": 48,
+      "secondContent": 111,
+      "longTasks1": 0,
+      "longTasks2": 0
+    },
+    {
+      "tab": "QUIZZES",
+      "firstIndicator": 87,
+      "firstContent": 2955,
+      "secondIndicator": 57,
+      "secondContent": 103,
+      "longTasks1": 0,
+      "longTasks2": 0
+    },
+    {
+      "tab": "LEADERBOARD",
+      "firstIndicator": 88,
+      "firstContent": 2931,
+      "secondIndicator": 37,
+      "secondContent": 86,
+      "longTasks1": 0,
+      "longTasks2": 0
+    },
+    {
+      "tab": "MEMBERS & INVITES",
+      "firstIndicator": 54,
+      "firstContent": 59,
+      "secondIndicator": 65,
+      "secondContent": 2434,
+      "longTasks1": 0,
+      "longTasks2": 0
+    },
+    {
+      "tab": "MATERIALS",
+      "firstIndicator": 31,
+      "firstContent": 39,
+      "secondIndicator": 57,
+      "secondContent": 357,
+      "longTasks1": 0,
+      "longTasks2": 0
+    }
+  ]
+}

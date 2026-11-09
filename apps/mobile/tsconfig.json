@@ -1,0 +1,15 @@
+{
+  "extends": "../../packages/config/tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@xor/shared-types": ["../../packages/shared-types/src/index.ts"],
+      "@xor/shared-utils": ["../../packages/shared-utils/src/index.ts"],
+      "@xor/api-client": ["../../packages/api-client/src/index.ts"],
+      "@xor/design-tokens": ["../../packages/design-tokens/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
+}
+
