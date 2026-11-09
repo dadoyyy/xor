@@ -11,3 +11,6 @@ next-env.d.ts
 backups/
 tests/visual/current*
 tests/visual/mobile/
+scratch/
+supabase/.temp/
+

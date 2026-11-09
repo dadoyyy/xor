@@ -1,0 +1,21 @@
+{
+  "extends": "../../packages/config/tsconfig.nextjs.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"],
+      "@xor/shared-types": ["../../packages/shared-types/src/index.ts"],
+      "@xor/shared-utils": ["../../packages/shared-utils/src/index.ts"],
+      "@xor/api-client": ["../../packages/api-client/src/index.ts"],
+      "@xor/design-tokens": ["../../packages/design-tokens/src/index.ts"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}
+

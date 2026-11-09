@@ -1,0 +1,18 @@
+{
+  "name": "@xor/backend",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@xor/shared-types": "0.1.0",
+    "@xor/shared-utils": "0.1.0"
+  },
+  "devDependencies": {
+    "@xor/config": "0.1.0",
+    "typescript": "^7.0.2"
+  }
+}
+

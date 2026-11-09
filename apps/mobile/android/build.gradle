@@ -1,0 +1,9 @@
+// Top-level Android Gradle configuration for xor mobile (Expo / React Native)
+// Keystores and signing secrets must never be committed; configure via EAS / CI secrets.
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+

@@ -1,0 +1,20 @@
+{
+  "name": "@xor/mobile",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/App.tsx",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@xor/api-client": "0.1.0",
+    "@xor/design-tokens": "0.1.0",
+    "@xor/shared-types": "0.1.0",
+    "@xor/shared-utils": "0.1.0"
+  },
+  "devDependencies": {
+    "@xor/config": "0.1.0",
+    "typescript": "^7.0.2"
+  }
+}
+
