@@ -84,3 +84,4 @@ console.log("Dedicated test account ready:");
 console.log(`  ID: ${testUser.id}`);
 console.log(`  Username: ${TEST_USERNAME}`);
 console.log(`  Email: ${TEST_EMAIL}`);
+

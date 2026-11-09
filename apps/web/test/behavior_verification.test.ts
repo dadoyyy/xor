@@ -489,3 +489,190 @@ test("App Shell Layout & Performance: Shell persistence, React cache, lightweigh
   assert.ok(!materialsClient.includes("setInterval(() => router.refresh(), 5000)"), "5s full router.refresh() polling removed from MaterialsClient");
   assert.ok(materialsClient.includes("fetch(`/api/materials/${id}`)"), "MaterialsClient polls lightweight status endpoint");
 });
+
+test("Design System: Strict No-Emoji Rule in UI Code", () => {
+  const EMOJI_REGEX =
+    /[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}\u{1FA00}-\u{1FAFF}]/gu;
+
+  const srcDir = path.resolve(webRoot, "src");
+  const extSet = new Set([".tsx", ".ts", ".jsx", ".js"]);
+
+  function scan(dir: string) {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        scan(full);
+      } else if (extSet.has(path.extname(entry.name))) {
+        const text = fs.readFileSync(full, "utf8");
+        const matches = [...text.matchAll(EMOJI_REGEX)];
+        assert.strictEqual(
+          matches.length,
+          0,
+          `File ${path.relative(webRoot, full)} contains prohibited emojis: ${matches.map((m) => m[0]).join(" ")}`
+        );
+      }
+    }
+  }
+
+  scan(srcDir);
+});
+
+test("Design System: Mascot Backdrop System Tokens and Component", () => {
+  const globalsCss = readWebFile("src/styles/globals.css");
+  assert.ok(globalsCss.includes("--mascot-bg-on-lilac:"), "--mascot-bg-on-lilac token is defined");
+  assert.ok(globalsCss.includes("--mascot-bg-on-cream:"), "--mascot-bg-on-cream token is defined");
+  assert.ok(globalsCss.includes("--mascot-bg-on-neutral:"), "--mascot-bg-on-neutral token is defined");
+  assert.ok(globalsCss.includes("--mascot-bg-on-white:"), "--mascot-bg-on-white token is defined");
+  assert.ok(globalsCss.includes('[data-surface="lilac"]'), 'data-surface="lilac" mapping exists');
+  assert.ok(globalsCss.includes('[data-surface="cream"]'), 'data-surface="cream" mapping exists');
+
+  const mascotComponent = readWebFile("src/components/ui/Mascot.tsx");
+  assert.ok(mascotComponent.includes("data-mascot-backdrop"), "Mascot renders data-mascot-backdrop");
+  assert.ok(mascotComponent.includes("aspect-square"), "Backdrop has 1:1 aspect ratio");
+  assert.ok(mascotComponent.includes("unoptimized"), "Mascot images are unoptimized for zero-failure loading");
+  assert.ok(mascotComponent.includes("resolveDimensions"), "Mascot safely resolves dimensions to numeric pixels");
+});
+
+test("Design System: Floating Sidebar Capsule & Item Highlight Specification", () => {
+  const globalsCss = readWebFile("src/styles/globals.css");
+  assert.ok(globalsCss.includes("--nav-active-bg: #6D3BE8"), "nav-active-bg token is defined as #6D3BE8");
+  assert.ok(globalsCss.includes("--nav-active-bg-soft: #EFE9FF"), "nav-active-bg-soft alternative token exists");
+  assert.ok(globalsCss.includes("--nav-inactive: #5B5480"), "nav-inactive token is defined as #5B5480");
+  assert.ok(globalsCss.includes("--nav-capsule-shadow: 0 6px 18px rgba(90, 43, 196, 0.10)"), "Lightened capsule shadow token");
+  assert.ok(globalsCss.includes(".nav-capsule-desktop"), "Compact desktop nav-capsule styles exist");
+
+  const sidebar = readWebFile("src/components/layout/GlobalSidebar.tsx");
+  assert.ok(sidebar.includes("size-[64px]") || sidebar.includes("rounded-full"), "Desktop items are circular");
+  assert.ok(sidebar.includes("rounded-full"), "Items have full circular radius");
+  assert.ok(sidebar.includes("w-[80px]") || sidebar.includes("w-[84px]"), "Capsule width accommodates circular items");
+  assert.ok(!sidebar.includes("uppercase"), "No uppercase transform on nav labels");
+  assert.ok(sidebar.includes("Home") && sidebar.includes("Subjects") && sidebar.includes("Calendar") && sidebar.includes("Progress"), "All 4 labels are sentence case");
+  assert.ok(sidebar.includes("bg-[var(--nav-active-bg)]"), "Purple background fill on active indicator");
+  assert.ok(sidebar.includes('data-indicator="desktop"'), "Smooth sliding indicator element exists on desktop");
+  assert.ok(sidebar.includes("translateY"), "Desktop indicator animates with translateY");
+  assert.ok(sidebar.includes("nav-item-mobile"), "Mobile navigation items exist");
+});
+
+test("Design System: Corgi & Pattern Cover Manifest, Deterministic Defaults & Edit Subject Modal", async () => {
+  const {
+    COVERS,
+    CORGI_COVERS,
+    PATTERN_COVERS,
+    COVER_IDS,
+    getCover,
+    getDeterministicCorgiCover,
+    isValidCoverId,
+  } = await import("../src/features/subjects/covers.ts");
+
+  // 1. Manifest length and IDs
+  assert.strictEqual(COVERS.length, 26, "Manifest has 26 covers (16 corgi + 10 patterns)");
+  assert.strictEqual(CORGI_COVERS.length, 16, "16 corgi-themed covers");
+  assert.strictEqual(PATTERN_COVERS.length, 10, "10 pattern covers");
+
+  // 2. All cover IDs match ^[a-z0-9-]{1,24}$
+  const EMOJI_REGEX =
+    /[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E6}-\u{1F1FF}\u{1FA00}-\u{1FAFF}]/gu;
+
+  for (const c of COVERS) {
+    assert.ok(isValidCoverId(c.id), `Cover ID "${c.id}" matches ^[a-z0-9-]{1,24}$`);
+    assert.ok(c.id.length <= 24, `Cover ID "${c.id}" is <= 24 chars`);
+    assert.strictEqual(
+      (c.label.match(EMOJI_REGEX) || []).length,
+      0,
+      `Label "${c.label}" contains no emojis`
+    );
+  }
+
+  // 3. Legacy pattern IDs still render
+  const legacyIds = [
+    "dots",
+    "stripes",
+    "waves",
+    "grid",
+    "sparkles",
+    "confetti",
+    "checker",
+    "zigzag",
+    "bubbles",
+    "plain",
+  ];
+  for (const lid of legacyIds) {
+    const cover = getCover(lid, "any-subject");
+    assert.strictEqual(cover.id, lid, `Legacy pattern ID "${lid}" resolves to itself`);
+    assert.strictEqual(cover.kind, "pattern", `Legacy pattern ID "${lid}" is of kind pattern`);
+  }
+
+  // 4. New corgi IDs render
+  const newCorgiIds = [
+    "corgi-reading",
+    "corgi-science",
+    "corgi-math",
+    "corgi-coding",
+    "corgi-art",
+    "corgi-music",
+    "corgi-history",
+    "corgi-language",
+    "corgi-nature",
+    "corgi-space",
+    "corgi-night-study",
+    "corgi-team",
+    "corgi-sleepy",
+    "paw-pattern",
+    "bone-pattern",
+    "corgi-faces",
+  ];
+  for (const cid of newCorgiIds) {
+    const cover = getCover(cid, "any-subject");
+    assert.strictEqual(cover.id, cid, `Corgi ID "${cid}" resolves to itself`);
+    assert.strictEqual(cover.kind, "image", `Corgi ID "${cid}" is of kind image`);
+    assert.ok(cover.src?.endsWith(".webp"), `Src path is WebP for "${cid}"`);
+    assert.ok(cover.thumb?.endsWith(".webp"), `Thumb path is WebP for "${cid}"`);
+  }
+
+  // 5. Deterministic default is stable for the same subject id
+  const subA = "f42031ab-0937-4e8a-bddd-7a69233f0248";
+  const defA1 = getCover(null, subA);
+  const defA2 = getCover(undefined, subA);
+  assert.strictEqual(defA1.id, defA2.id, "Stable deterministic cover for subject A");
+  assert.strictEqual(defA1.category, "corgi", "Default cover is from corgi covers");
+
+  const subB = "222bbdcb-7e1b-4e16-9bb0-1be263b02855";
+  const defB1 = getCover(null, subB);
+  assert.strictEqual(defB1.category, "corgi", "Default cover for subject B is from corgi covers");
+
+  // 6. Unknown IDs safely fall back to deterministic default
+  const fallbackCover = getCover("non-existent-unknown-id", subA);
+  assert.strictEqual(fallbackCover.id, defA1.id, "Unknown cover ID falls back to deterministic default");
+
+  // 7. EditSubjectModal and SubjectCover component checks
+  const modalCode = readWebFile("src/features/subjects/components/EditSubjectModal.tsx");
+  assert.ok(modalCode.includes('role="radiogroup"'), "Modal picker uses role=radiogroup");
+  assert.ok(modalCode.includes('role="radio"'), "Thumbnails use role=radio");
+  assert.ok(modalCode.includes("Surprise me"), "Contains 'Surprise me' button");
+  assert.ok(modalCode.includes("Dices"), "Uses vector Lucide Dices icon");
+  assert.ok(!modalCode.includes("🎲"), "No emoji dice in modal");
+
+  const coverComponent = readWebFile("src/features/subjects/components/SubjectCover.tsx");
+  assert.ok(coverComponent.includes('alt=""'), "SubjectCover is decorative with alt=''");
+  assert.ok(coverComponent.includes('aria-hidden="true"'), "SubjectCover has aria-hidden='true'");
+  assert.ok(coverComponent.includes("unoptimized"), "Next/Image has unoptimized prop");
+});
+
+test("Design System: Browser Tab Title is Strictly 'xor' Everywhere", () => {
+  const rootLayout = readWebFile("src/app/layout.tsx");
+  assert.ok(rootLayout.includes('default: "xor"'), "Root layout default title is xor");
+  assert.ok(rootLayout.includes('template: "xor"'), "Root layout template is fixed to xor without %s variable");
+
+  const appShell = readWebFile("src/components/layout/AppShell.tsx");
+  assert.ok(appShell.includes('document.title = "xor"'), "AppShell enforces document.title as xor");
+
+  const globalSidebar = readWebFile("src/components/layout/GlobalSidebar.tsx");
+  assert.ok(globalSidebar.includes('document.title = "xor"'), "GlobalSidebar navigation enforces document.title as xor");
+
+  const flashcardsPage = readWebFile("src/app/(app)/subjects/[id]/flashcards/page.tsx");
+  assert.ok(flashcardsPage.includes('title: "xor"'), "Flashcards page title is xor");
+
+  const homePage = readWebFile("src/app/(app)/home/page.tsx");
+  assert.ok(homePage.includes('title: "xor"'), "Home page title is xor");
+});

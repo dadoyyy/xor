@@ -19,7 +19,13 @@ export default function TopBar({
   const router = useRouter();
   const pathname = usePathname();
   const [query, setQuery] = useState("");
+  const [optimisticTabHref, setOptimisticTabHref] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Sync optimistic tab when real pathname updates
+  useEffect(() => {
+    setOptimisticTabHref(null);
+  }, [pathname]);
 
   // Mount effect verification logging
   useEffect(() => {
@@ -79,36 +85,38 @@ export default function TopBar({
   else if (pathname.startsWith("/calendar")) pageTitle = "Academic Calendar";
   else if (pathname.startsWith("/progress")) pageTitle = "Your Progress";
 
+  const activeTabPath = optimisticTabHref ?? pathname;
+
   const subjectTabs = subjectId
     ? [
         {
           label: "MATERIALS",
           href: `/subjects/${subjectId}`,
-          isActive: pathname === `/subjects/${subjectId}` || pathname === `/rooms/${subjectId}`,
+          isActive: activeTabPath === `/subjects/${subjectId}` || activeTabPath === `/rooms/${subjectId}`,
         },
         {
           label: "FLASHCARDS",
           href: `/subjects/${subjectId}/flashcards`,
-          isActive: pathname.startsWith(`/subjects/${subjectId}/flashcards`) || pathname.startsWith(`/rooms/${subjectId}/flashcards`),
+          isActive: activeTabPath.startsWith(`/subjects/${subjectId}/flashcards`) || activeTabPath.startsWith(`/rooms/${subjectId}/flashcards`),
         },
         {
           label: "QUIZZES",
           href: `/subjects/${subjectId}/quizzes`,
-          isActive: pathname.startsWith(`/subjects/${subjectId}/quizzes`) || pathname.startsWith(`/rooms/${subjectId}/quizzes`),
+          isActive: activeTabPath.startsWith(`/subjects/${subjectId}/quizzes`) || activeTabPath.startsWith(`/rooms/${subjectId}/quizzes`),
         },
         {
           label: "LEADERBOARD",
           href: `/subjects/${subjectId}/leaderboard`,
-          isActive: pathname.startsWith(`/subjects/${subjectId}/leaderboard`) || pathname.startsWith(`/rooms/${subjectId}/leaderboard`),
+          isActive: activeTabPath.startsWith(`/subjects/${subjectId}/leaderboard`) || activeTabPath.startsWith(`/rooms/${subjectId}/leaderboard`),
         },
         {
           label: "MEMBERS & INVITES",
           href: `/subjects/${subjectId}/sharing`,
           isActive:
-            pathname.startsWith(`/subjects/${subjectId}/sharing`) ||
-            pathname.startsWith(`/subjects/${subjectId}/members`) ||
-            pathname.startsWith(`/rooms/${subjectId}/sharing`) ||
-            pathname.startsWith(`/rooms/${subjectId}/members`),
+            activeTabPath.startsWith(`/subjects/${subjectId}/sharing`) ||
+            activeTabPath.startsWith(`/subjects/${subjectId}/members`) ||
+            activeTabPath.startsWith(`/rooms/${subjectId}/sharing`) ||
+            activeTabPath.startsWith(`/rooms/${subjectId}/members`),
         },
       ]
     : [];
@@ -117,39 +125,42 @@ export default function TopBar({
     <header
       data-topbar="true"
       aria-label="Top navigation bar"
-      className="flex h-14 sm:h-16 w-full shrink-0 items-center justify-between px-3 sm:px-4 text-white select-none z-30"
+      className="flex h-14 sm:h-16 w-full shrink-0 items-center justify-between px-3 sm:px-4 text-[var(--shell-fg)] select-none z-30"
     >
       {/* Left: Back button in subject OR page title */}
       <div className="flex items-center gap-3 shrink-0 min-w-0">
         {subjectId ? (
           <Link
             href="/subjects"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/12 hover:bg-white/20 text-white text-xs font-bold transition active:scale-95"
+            prefetch={true}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--shell-surface)] hover:bg-white text-[var(--shell-fg)] border border-[rgba(43,27,90,0.12)] text-xs font-bold transition active:scale-95 shadow-none"
           >
             <ChevronLeft size={16} />
             <span>Back</span>
           </Link>
         ) : (
-          <h1 className="font-display text-base sm:text-lg font-bold tracking-tight text-white truncate">
+          <h1 className="font-display text-base sm:text-lg font-bold tracking-tight text-[var(--shell-fg)] truncate">
             {pageTitle}
           </h1>
         )}
       </div>
 
-      {/* Center: Subject section tabs on the colored frame */}
+      {/* Center: Subject section tabs on the frame */}
       {subjectId && (
         <nav
           aria-label="Subject section tabs"
-          className="hidden md:flex items-center gap-4 lg:gap-6 overflow-x-auto no-scrollbar py-1 px-2"
+          className="flex items-center gap-3 sm:gap-5 lg:gap-6 overflow-x-auto no-scrollbar py-1 px-1 max-w-[50vw] sm:max-w-none"
         >
           {subjectTabs.map((tab) => (
             <Link
               key={tab.label}
               href={tab.href}
-              className={`text-xs tracking-[0.06em] uppercase whitespace-nowrap transition-all pb-1 ${
+              prefetch={true}
+              onClick={() => setOptimisticTabHref(tab.href)}
+              className={`text-xs tracking-[0.06em] uppercase whitespace-nowrap transition-all pb-1 shrink-0 ${
                 tab.isActive
-                  ? "font-bold text-white border-b-2 border-white"
-                  : "font-semibold text-white/70 hover:text-white"
+                  ? "font-bold text-[var(--shell-fg)] border-b-2 border-[var(--shell-accent)]"
+                  : "font-semibold text-[var(--shell-muted)] hover:text-[var(--shell-fg)]"
               }`}
             >
               {tab.label}
@@ -163,7 +174,7 @@ export default function TopBar({
         <form onSubmit={handleSearch} className="relative hidden sm:block">
           <Search
             size={14}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/60"
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--shell-muted)]"
           />
           <input
             ref={searchInputRef}
@@ -171,7 +182,7 @@ export default function TopBar({
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
             placeholder="Search subjects... (/)"
-            className="w-36 sm:w-48 lg:w-56 rounded-[10px] border border-white/15 bg-white/12 py-1.5 pl-8 pr-3 text-xs text-white placeholder:text-white/60 transition-all focus:bg-white/20 focus:border-white/30 focus:outline-none focus:ring-2 focus:ring-white/40"
+            className="w-36 sm:w-48 lg:w-56 h-8 rounded-full border border-[rgba(43,27,90,0.12)] bg-[var(--shell-surface)] pl-8 pr-3 text-xs text-[var(--shell-fg)] placeholder:text-[var(--shell-muted)] transition-all focus:bg-white focus:border-[var(--shell-accent)] focus:outline-none focus:ring-2 focus:ring-[var(--shell-accent)]/30"
           />
         </form>
 
