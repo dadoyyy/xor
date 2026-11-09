@@ -1,25 +1,97 @@
-import { createClient } from "@supabase/supabase-js";
 import fs from "fs";
+import { chromium } from "playwright";
+import { createClient } from "@supabase/supabase-js";
+import { createServerClient } from "@supabase/ssr";
 
-const raw = fs.readFileSync(".env.local", "utf8");
+const envFile = fs.readFileSync(".env.local", "utf8");
 const env = {};
-for (const line of raw.split(/\r?\n/)) {
-  const idx = line.indexOf("=");
-  if (idx !== -1) env[line.slice(0, idx).trim()] = line.slice(idx + 1).trim().replace(/^['"]|['"]$/g, "");
+for (const line of envFile.split(/\r?\n/)) {
+  const trimmed = line.trim();
+  if (!trimmed || trimmed.startsWith("#")) continue;
+  const idx = trimmed.indexOf("=");
+  if (idx !== -1) {
+    const k = trimmed.slice(0, idx).trim();
+    let v = trimmed.slice(idx + 1).trim();
+    if ((v.startsWith('"') && v.endsWith('"')) || (v.startsWith("'") && v.endsWith("'"))) {
+      v = v.slice(1, -1);
+    }
+    env[k] = v;
+  }
 }
 
-const client = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
-  auth: { persistSession: false, autoRefreshToken: false },
+const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
+const serviceKey = env.SUPABASE_SERVICE_ROLE_KEY;
+const admin = createClient(supabaseUrl, serviceKey, {
+  auth: { autoRefreshToken: false, persistSession: false },
 });
 
-async function run() {
-  const { data: d } = await client.from("decks").select("id, title, room_id");
-  const { data: q } = await client.from("quizzes").select("id, title, room_id");
-  console.log("Decks count:", d?.length);
-  d?.forEach(item => console.log(`  Deck: "${item.title}" (${item.id})`));
-  console.log("Quizzes count:", q?.length);
-  q?.forEach(item => console.log(`  Quiz: "${item.title}" (${item.id})`));
+const { data: profile } = await admin
+  .from("profiles")
+  .select("id, username")
+  .eq("id", "222bbdcb-7e1b-4e16-9bb0-1be263b02855")
+  .single();
+
+const { data: userData } = await admin.auth.admin.getUserById(profile.id);
+const { data: link } = await admin.auth.admin.generateLink({
+  type: "magiclink",
+  email: userData.user.email,
+});
+
+const anonClient = createClient(supabaseUrl, env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+const { data: sessionData } = await anonClient.auth.verifyOtp({
+  token_hash: link.properties.hashed_token,
+  type: "magiclink",
+});
+
+const cookiesToSet = [];
+const ssr = createServerClient(supabaseUrl, env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
+  cookies: {
+    getAll: () => [],
+    setAll: (c) => cookiesToSet.push(...c),
+  },
+});
+await ssr.auth.setSession(sessionData.session);
+
+const browser = await chromium.launch({
+  headless: true,
+  executablePath: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+});
+
+const context = await browser.newContext();
+await context.addCookies(
+  cookiesToSet.map((c) => ({
+    name: c.name,
+    value: c.value,
+    domain: "localhost",
+    path: "/",
+    httpOnly: c.options?.httpOnly ?? false,
+    secure: c.options?.secure ?? false,
+    sameSite: "Lax",
+  }))
+);
+
+const page = await context.newPage();
+
+const routesToTest = [
+  "/home",
+  "/subjects",
+  "/calendar",
+  "/progress",
+  "/subjects/f42031ab-0937-4e8a-bddd-7a69233f0248/flashcards",
+  "/login",
+  "/signup",
+];
+
+for (const route of routesToTest) {
+  await page.goto(`http://localhost:3000${route}`, { waitUntil: "networkidle" });
+  await page.waitForTimeout(300);
+  const title = await page.title();
+  console.log(`Route: ${route.padEnd(60)} Title: "${title}"`);
+  if (title !== "xor") {
+    console.error(`FAIL: Expected "xor" but got "${title}" on ${route}`);
+    process.exit(1);
+  }
 }
 
-run();
-
+console.log("\nALL ROUTES PRODUCED STRICT TITLE 'xor'!");
+await browser.close();

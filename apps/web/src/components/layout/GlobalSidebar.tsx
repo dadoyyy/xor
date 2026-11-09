@@ -17,15 +17,14 @@ export default function GlobalSidebar({
   username = "Student",
   streak,
 }: {
-  mobileOpen?: boolean;
-  onCloseMobile?: () => void;
   username?: string;
   streak?: StreakData | null;
 }) {
   const pathname = usePathname();
   const [optimisticPath, setOptimisticPath] = useState<string | null>(null);
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
-  // Mount effect verification logging
+  // Mount effect verification logging - ensures persistent layout doesn't remount
   useEffect(() => {
     console.log("[xor:shell] GlobalSidebar mounted");
     return () => console.log("[xor:shell] GlobalSidebar UNMOUNTED");
@@ -34,7 +33,34 @@ export default function GlobalSidebar({
   // Sync optimistic path when real pathname finishes updating
   useEffect(() => {
     setOptimisticPath(null);
+    document.title = "xor";
   }, [pathname]);
+
+  // Mobile keyboard detection: hide floating bottom bar when typing in inputs/textareas
+  useEffect(() => {
+    const handleFocusIn = (e: FocusEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable)
+      ) {
+        setIsKeyboardOpen(true);
+      }
+    };
+
+    const handleFocusOut = () => {
+      setIsKeyboardOpen(false);
+    };
+
+    window.addEventListener("focusin", handleFocusIn);
+    window.addEventListener("focusout", handleFocusOut);
+    return () => {
+      window.removeEventListener("focusin", handleFocusIn);
+      window.removeEventListener("focusout", handleFocusOut);
+    };
+  }, []);
 
   const activePath = optimisticPath ?? pathname;
   const isHome = activePath === "/home";
@@ -69,19 +95,21 @@ export default function GlobalSidebar({
     },
   ];
 
+  const activeIndex = navItems.findIndex((item) => item.isActive);
+
   return (
     <>
-      {/* 1. Desktop & Tablet: Narrow Sidebar Directly on Deep Purple Frame */}
+      {/* 1. Desktop & Tablet: Floating Pill-Shaped Capsule Sidebar (>= 768px) */}
       <aside
         data-sidebar="true"
         aria-label="App Sidebar"
-        className="hidden md:flex flex-col justify-between items-center w-[84px] lg:w-[88px] shrink-0 py-3 sm:py-4 select-none"
+        className="hidden md:flex flex-col items-center w-[84px] shrink-0 py-2 sm:py-3 select-none z-20"
       >
-        {/* Top Brand Logo */}
-        <div className="flex flex-col items-center gap-1">
+        {/* Top Brand Logo - OUTSIDE the capsule */}
+        <div className="flex flex-col items-center shrink-0 pt-1">
           <Link
             href="/home"
-            className="flex flex-col items-center group transition active:scale-95"
+            className="flex flex-col items-center group transition active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--shell-accent)] rounded-full"
             aria-label="xor home"
           >
             <div className="relative size-10 shrink-0">
@@ -92,58 +120,89 @@ export default function GlobalSidebar({
                 height={40}
                 className="object-contain"
                 priority
+                unoptimized
               />
             </div>
-            <span className="font-display text-sm font-bold tracking-tight text-white mt-1">
+            <span className="font-display text-sm font-bold tracking-tight text-[var(--shell-fg)] mt-0.5">
               xor
             </span>
           </Link>
         </div>
 
-        {/* 4 Navigation Buttons: Icon-over-label, active state is a 48px white circle */}
-        <nav
-          aria-label="Main Navigation"
-          className="flex flex-col items-center gap-5 my-auto w-full px-2"
-        >
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setOptimisticPath(item.href)}
-                aria-current={item.isActive ? "page" : undefined}
-                className={`flex flex-col items-center justify-center transition-all duration-150 group active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 rounded-xl ${
-                  item.isActive ? "text-white" : "text-white/70 hover:text-white"
-                }`}
-              >
-                {item.isActive ? (
-                  <div className="size-12 rounded-full bg-white text-[#5223BD] flex items-center justify-center shadow-none transition-transform group-hover:scale-105">
-                    <Icon size={22} className="stroke-[2.5]" />
-                  </div>
-                ) : (
-                  <div className="size-12 rounded-full flex items-center justify-center transition-colors group-hover:bg-white/10">
-                    <Icon size={22} className="stroke-[2]" />
-                  </div>
-                )}
-                <span className="text-[10px] lg:text-[11px] font-bold uppercase tracking-[0.06em] mt-1 text-center">
-                  {item.label}
-                </span>
-              </Link>
-            );
-          })}
-        </nav>
+        {/* Floating Capsule Container: Centered vertically in sidebar space below logo */}
+        <div className="my-auto flex flex-col items-center">
+          <nav
+            aria-label="Main"
+            className="relative nav-capsule nav-capsule-desktop w-[80px] px-2 py-3 flex flex-col items-center gap-2 select-none overflow-hidden"
+          >
+            {/* Smooth animated sliding circle indicator */}
+            <div
+              data-indicator="desktop"
+              className="pointer-events-none absolute rounded-full bg-[var(--nav-active-bg)] z-0 shadow-sm"
+              style={{
+                width: "var(--nav-indicator-size, 64px)",
+                height: "var(--nav-indicator-size, 64px)",
+                top: "var(--nav-indicator-top, 12px)",
+                left: "var(--nav-indicator-left, 8px)",
+                transform:
+                  activeIndex >= 0
+                    ? `translateY(calc(${activeIndex} * var(--nav-indicator-step, 72px)))`
+                    : "translateY(0px)",
+                opacity: activeIndex >= 0 ? 1 : 0,
+                transition:
+                  "transform 0.32s cubic-bezier(0.34, 1.45, 0.64, 1), opacity 0.2s ease",
+              }}
+              aria-hidden="true"
+            />
 
-        {/* Bottom Spacer / Clean indicator */}
-        <div className="flex flex-col items-center text-white/50 text-[10px] font-bold">
-          <span>xor</span>
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  prefetch={true}
+                  onClick={() => setOptimisticPath(item.href)}
+                  aria-current={item.isActive ? "page" : undefined}
+                  className={`size-[64px] nav-item-desktop rounded-full flex flex-col items-center justify-center gap-[3px] select-none active:scale-[0.97] cursor-pointer relative z-10 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--nav-active-bg)] focus-visible:ring-offset-2 ${
+                    item.isActive
+                      ? "text-white"
+                      : "bg-transparent text-[var(--nav-inactive)] hover:bg-[#EFE9FF]/60 hover:text-[#5A2BC4]"
+                  }`}
+                >
+                  <Icon
+                    size={21}
+                    className={`shrink-0 transition-colors duration-200 ${
+                      item.isActive
+                        ? "text-white stroke-[2.2]"
+                        : "fill-none text-[var(--nav-inactive)] stroke-[1.75]"
+                    }`}
+                  />
+                  <span
+                    className={`text-[10.5px] leading-[1.1] text-center whitespace-nowrap tracking-normal transition-colors duration-200 ${
+                      item.isActive
+                        ? "font-bold text-white"
+                        : "font-semibold text-[var(--nav-inactive)] group-hover:text-[#5A2BC4]"
+                    }`}
+                  >
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            })}
+          </nav>
         </div>
       </aside>
 
-      {/* 2. Mobile Bottom Bar: 56px Tall on Frame (<768px) */}
+      {/* 2. Phone (< 768px): Floating Bottom Bar Horizontal Capsule */}
       <nav
-        aria-label="Mobile Navigation"
-        className="md:hidden fixed bottom-0 inset-x-0 z-40 h-14 bg-[#5223BD] border-t border-white/10 flex items-center justify-around px-2 pb-safe"
+        aria-label="Main"
+        className={`md:hidden fixed z-40 inset-x-3 max-w-md mx-auto h-[60px] nav-capsule px-2 py-1.5 flex items-center justify-between gap-1.5 transition-all duration-150 ${
+          isKeyboardOpen ? "translate-y-28 opacity-0 pointer-events-none" : "translate-y-0 opacity-100"
+        }`}
+        style={{
+          bottom: "calc(12px + env(safe-area-inset-bottom, 0px))",
+        }}
       >
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -151,22 +210,30 @@ export default function GlobalSidebar({
             <Link
               key={item.href}
               href={item.href}
+              prefetch={true}
               onClick={() => setOptimisticPath(item.href)}
               aria-current={item.isActive ? "page" : undefined}
-              className={`flex flex-col items-center justify-center min-w-[56px] min-h-[44px] transition ${
-                item.isActive ? "text-white" : "text-white/70 hover:text-white"
+              className={`flex-1 min-h-[44px] h-12 nav-item-mobile rounded-[18px] flex flex-col items-center justify-center gap-[2px] active:scale-[0.97] select-none text-center cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--nav-active-bg)] focus-visible:ring-offset-2 ${
+                item.isActive
+                  ? "bg-[var(--nav-active-bg)] text-white shadow-sm"
+                  : "bg-transparent text-[var(--nav-inactive)] hover:bg-[#EFE9FF]/60 hover:text-[#5A2BC4]"
               }`}
             >
-              {item.isActive ? (
-                <div className="size-8 rounded-full bg-white text-[#5223BD] flex items-center justify-center">
-                  <Icon size={18} className="stroke-[2.5]" />
-                </div>
-              ) : (
-                <div className="size-8 flex items-center justify-center">
-                  <Icon size={18} className="stroke-[2]" />
-                </div>
-              )}
-              <span className="text-[9px] font-bold uppercase tracking-[0.05em] mt-0.5 leading-none">
+              <Icon
+                size={20}
+                className={`shrink-0 transition-colors duration-200 ${
+                  item.isActive
+                    ? "text-white stroke-[2.2]"
+                    : "fill-none text-[var(--nav-inactive)] stroke-[1.75]"
+                }`}
+              />
+              <span
+                className={`text-[11px] leading-[1.1] text-center whitespace-nowrap tracking-normal transition-colors duration-200 ${
+                  item.isActive
+                    ? "font-bold text-white"
+                    : "font-semibold text-[var(--nav-inactive)]"
+                }`}
+              >
                 {item.label}
               </span>
             </Link>

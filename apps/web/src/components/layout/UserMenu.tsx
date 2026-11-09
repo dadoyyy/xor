@@ -56,15 +56,15 @@ export default function UserMenu({ username }: { username: string }) {
   return (
     <div ref={ref} className="relative">
       <button
-        className="btn btn-sm rounded-full bg-white/12 hover:bg-white/20 border border-white/20 text-white transition active:scale-95"
+        className="btn btn-sm rounded-full bg-white hover:bg-white/95 border border-[rgba(43,27,90,0.12)] text-[var(--shell-fg)] transition hover:border-[var(--shell-accent)]/30 active:scale-95 shadow-none"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
       >
-        <span className="grid size-6 place-items-center rounded-full bg-sun text-xs font-bold text-ink">
+        <span className="grid size-6 place-items-center rounded-full bg-sun text-xs font-bold text-[#2B1B5A]">
           {username.slice(0, 1).toUpperCase()}
         </span>
-        <span className="hidden max-w-[9rem] truncate sm:inline text-white font-bold">{username}</span>
-        <ChevronDown size={14} className="text-white/80" />
+        <span className="hidden max-w-[9rem] truncate sm:inline text-[var(--shell-fg)] font-bold">{username}</span>
+        <ChevronDown size={14} className="text-[var(--shell-muted)]" />
       </button>
       {open && (
         <div className="card menu-in absolute right-0 mt-2 w-60 overflow-hidden p-2 bg-white text-ink border border-line rounded-[16px] shadow-xl z-50">

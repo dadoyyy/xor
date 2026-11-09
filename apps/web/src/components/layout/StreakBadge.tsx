@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { Flame } from "lucide-react";
 import { CORGI_ASSETS } from "@/lib/mascot/assets";
 
 export type StreakData = {
@@ -56,16 +57,16 @@ export default function StreakBadge({ streak: initialStreak }: { streak?: Streak
         onClick={() => setShowTooltip(!showTooltip)}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
-        className={`flex items-center gap-1.5 rounded-full border px-3 py-1 font-display text-xs font-bold transition-transform active:scale-95 cursor-pointer ${
+        className={`flex items-center gap-1.5 rounded-full border px-3 py-1 font-display text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-none ${
           isQualified
-            ? "border-mint/80 bg-mint/25 text-white"
+            ? "border-mint/40 bg-white text-[var(--shell-fg)] hover:border-mint"
             : count > 0
-              ? "border-sun/80 bg-sun/25 text-white"
-              : "border-white/20 bg-white/12 text-white hover:bg-white/20"
+              ? "border-sun/50 bg-white text-[var(--shell-fg)] hover:border-sun"
+              : "border-[rgba(43,27,90,0.12)] bg-white text-[var(--shell-fg)] hover:border-[var(--shell-accent)]/30 hover:bg-white/95"
         }`}
         aria-label={`Study streak: ${count} days`}
       >
-        <span className="text-sm">🔥</span>
+        <Flame size={14} className="text-amber-500 fill-amber-500 shrink-0" />
         <span>
           {count} {count === 1 ? "day" : "days"}
         </span>
