@@ -353,7 +353,9 @@ export default function LandingSections() {
                             >
                               <span>{choice}</span>
                               {isCorrect && (
-                                <Check size={16} className="float-right font-bold text-grape inline" />
+                                <span className="float-right inline-flex items-center text-grape" suppressHydrationWarning>
+                                  <Check size={16} />
+                                </span>
                               )}
                             </div>
                           );
