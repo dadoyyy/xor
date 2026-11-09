@@ -111,23 +111,41 @@ Open your Vercel URL on your phone:
 ## Project structure
 
 ```
-app/
-  page.tsx                     landing page
-  login, signup, forgot, reset-password, onboarding, auth/callback
-  rooms/                       your rooms + create/join
-  rooms/[id]/                  materials (room home)
-    flashcards/                decks, new deck, study view
-    quizzes/                   list, new quiz, quiz page, take, results
-    leaderboard/               room leaderboard + reset vote
-    members/                   members, secret key, room settings
-  api/                         server routes that call the AI or need admin access
-lib/
-  ai/gemini.ts                 PDF reading, flashcards, quiz generation, grading
-  questions.ts                 question types and scoring
-  limits.ts                    daily per-user AI limits
-  supabase/                    Supabase clients
-supabase/schema.sql            database, security rules, leaderboard functions
-public/sw.js                   service worker (installable app + offline page)
+project-root/
+├── apps/
+│   ├── web/                       # React / Next.js 16 web application
+│   │   ├── public/                # Static assets, PWA icons & service worker (sw.js)
+│   │   └── src/
+│   │       ├── app/               # Thin routing layer (pages, layouts, API routes)
+│   │       ├── features/          # Feature-first domain modules (auth, rooms, materials, flashcards, quizzes, leaderboard, members)
+│   │       ├── components/        # Shared UI (ui/) & layout (layout/) primitives
+│   │       ├── hooks/             # Shared React hooks (useNav, useRoomUpdates)
+│   │       ├── lib/               # Third-party SDK clients (ai/gemini.ts, supabase/)
+│   │       ├── services/          # Shared server/domain services (authService, limitService, noteService, seenService)
+│   │       ├── utils/             # Pure helpers (questions.ts, sound.ts)
+│   │       ├── constants/         # App-wide constants (questions.ts)
+│   │       ├── types/             # Shared TypeScript types (questions.ts, room.ts)
+│   │       ├── styles/globals.css # Tailwind v4 theme & global styles
+│   │       └── proxy.ts           # Next.js 16 auth & route protection proxy
+│   ├── mobile/                    # React Native (Expo) mobile application
+│   │   ├── src/features/          # Mobile feature modules
+│   │   ├── android/               # Native Android config, signing, Gradle
+│   │   ├── app.json               # Expo app manifest
+│   │   └── eas.json               # Build and Play Store submission config
+│   ├── backend/                   # Platform-agnostic backend service
+│   │   └── src/modules/           # Domain modules, routes, controllers, services, repositories
+│   └── agent/                     # AI study agent workspace
+├── packages/
+│   ├── shared-types/              # TypeScript types / API contracts (@xor/shared-types)
+│   ├── shared-utils/              # Validation, formatters, constants (@xor/shared-utils)
+│   ├── api-client/                # Typed API calls used by web and mobile (@xor/api-client)
+│   ├── design-tokens/             # Colors, spacing, typography (@xor/design-tokens)
+│   └── config/                    # Shared tsconfig (@xor/config)
+├── docs/                          # Architecture & Play Store release docs
+├── scripts/                       # Build and release helper scripts
+├── supabase/schema.sql            # Database, security rules, leaderboard functions
+├── .github/workflows/             # CI/CD (separate pipelines per app)
+└── package.json                   # Workspaces configuration
 ```
 
 ## Security notes
